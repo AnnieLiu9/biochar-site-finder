@@ -1,0 +1,5 @@
+idx,site_id,site,lat,lon,machine_size,capacity_tpy,wet_tons_in,dry_tons,biochar_tons_out,carbon_credits,biochar_revenue,carbon_credit_revenue,tipping_fee_income,wood_purchase_cost,trucking_cost,opex_rent,annual_profit,capex,npv
+0,K1,DSNY Fresh Kills Composting Facility,40.58586,-74.19319,Large,50000,50000,27500,7563,10588,3781250,1873988,1750000,0,335844,900000,6169393,9500000,37424895
+1,K2,Garden City Compost,40.72178,-73.64408,Medium,30000,30000,16841,4631,6484,2315625,1147624,1050000,0,137484,600000,3775764,5900000,22818764
+2,K3,Omni Recycling of Babylon,40.7308,-73.39634,Medium,30000,30000,18000,4950,6930,2475000,1226610,1050000,0,88700,600000,4062910,5900000,25002819
+4,K5,Long Island Compost Farm #36,40.85226,-72.83329,Medium,30000,30000,16750,4606,6449,2303125,1141429,1050000,0,38106,600000,3856448,5900000,23432452

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+
+# Raw downloads used only while collecting data (the pipeline does not read them; see data/SOURCES.md)
+data/raw/
+
+# Scratch / superseded research files
+research/v2_backup/
+research/wsu.txt
+research/_*

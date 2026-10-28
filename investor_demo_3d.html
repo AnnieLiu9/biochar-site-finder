@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biochar Site Finder - NY Investor Demo</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/deck.gl@9.3.11/dist.min.js"></script>
+<style>
+:root{
+  --bg:#060a12; --panel:rgba(10,15,26,.76); --line:rgba(255,255,255,.10); --txt:#e8eef9; --mut:#8ea0bb;
+  --gold:#ffcf4d; --cyan:#3df5ff; --green:#46f08a; --blue:#3b82ff; --red:#ff6b6b; --amber:#ffa63d;
+  --font:-apple-system,"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:var(--font);overflow:hidden}
+#map{position:absolute;inset:0}
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(2,4,10,.65) 100%)}
+.panel{position:relative;flex:none;background:var(--panel);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
+  border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  opacity:0;transform:translateY(10px);transition:opacity .8s ease, transform .8s ease}
+body.ready .panel{opacity:1;transform:none}
+body.ready #pLeft{transition-delay:.1s} body.ready #pAsm{transition-delay:.3s} body.ready #pRight{transition-delay:.5s} body.ready #pBar{transition-delay:.7s}
+.col{position:absolute;top:16px;bottom:16px;z-index:5;display:flex;flex-direction:column;gap:12px;overflow-y:auto;scrollbar-width:none;pointer-events:none;padding:0 2px}
+.col::-webkit-scrollbar{display:none} .col>.panel{pointer-events:auto}
+#colL{left:16px;width:380px} #colR{right:16px;width:330px}
+
+/* header + KPIs */
+#pLeft{padding:18px 18px 16px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.logo{width:38px;height:38px;border-radius:11px;flex:none;display:grid;place-items:center;font-size:20px;background:linear-gradient(135deg,#ffcf4d,#ff8a3d);box-shadow:0 0 22px rgba(255,170,60,.55)}
+h1{margin:0;font-size:21px;letter-spacing:.2px;font-weight:700}
+.sub{color:var(--mut);font-size:12px;margin:2px 0 14px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:10px 11px}
+.kpi.hero{grid-column:span 3;display:flex;align-items:flex-end;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,rgba(255,207,77,.14),rgba(255,138,61,.05));border-color:rgba(255,207,77,.3)}
+.kpi span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);margin-bottom:3px}
+.kpi b{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi.hero b{font-size:34px;color:var(--gold);text-shadow:0 0 24px rgba(255,207,77,.35)}
+.delta{font-size:12px;font-weight:600;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.07);white-space:nowrap}
+.delta.up{color:var(--green)} .delta.down{color:var(--red)} .delta.flat{color:var(--mut)}
+.bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.insight{margin-top:12px;font-size:12.5px;line-height:1.5;color:#cfd9ea;border-left:3px solid var(--gold);padding:2px 0 2px 10px;min-height:38px}
+#solveStat{font-size:11px;color:var(--mut);margin-top:10px;display:flex;align-items:center;gap:7px}
+#solveStat i{width:8px;height:8px;border-radius:50%;background:var(--mut);display:inline-block}
+#solveStat.ok i{background:var(--green);box-shadow:0 0 8px var(--green)} #solveStat.busy i{background:var(--gold);animation:blink .8s infinite} #solveStat.off i{background:var(--red)}
+@keyframes blink{50%{opacity:.25}}
+
+/* assumptions panel */
+#pAsm{padding:14px 14px 10px}
+.ahead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ahead b{font-size:14px;letter-spacing:.3px}
+.link{background:none;border:0;color:var(--cyan);font:inherit;font-size:12px;cursor:pointer;padding:0}
+.asub{font-size:11.5px;color:var(--mut);line-height:1.45;margin:0 0 10px}
+.keys{display:flex;gap:12px;font-size:11px;color:#cfd9ea;margin-bottom:10px;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--txt);border-radius:99px;padding:5px 10px;font:inherit;font-size:11.5px;cursor:pointer;transition:.2s}
+.chip:hover{border-color:var(--gold);color:var(--gold)} .chip.on{background:rgba(255,207,77,.18);border-color:var(--gold);color:var(--gold)}
+details.grp{border-top:1px solid var(--line);padding:2px 0}
+details.grp>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:9px 2px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#cfd9ea}
+details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary::after{content:'+';font-size:16px;color:var(--mut);font-weight:400}
+details.grp[open]>summary::after{content:'\2212'}
+details.grp>summary small{font-weight:500;color:var(--mut);text-transform:none;letter-spacing:0;margin-left:6px}
+.prm{padding:7px 0 9px}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px}
+.pl{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.tg{font-style:normal;font-size:9.5px;padding:1px 7px;border-radius:99px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.tg.R{background:rgba(70,240,138,.14);color:var(--green);border:1px solid rgba(70,240,138,.4)}
+.tg.A{background:rgba(255,166,61,.12);color:var(--amber);border:1px solid rgba(255,166,61,.4)}
+.pv{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mut);white-space:nowrap}
+.pv input{width:78px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:4px 6px;font:inherit;font-size:12.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.pv input:focus{outline:none;border-color:var(--gold)} .prm.chg .pv input{color:var(--gold);border-color:rgba(255,207,77,.55)}
+.pv input::-webkit-outer-spin-button,.pv input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0} .pv input{-moz-appearance:textfield}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:99px;background:rgba(255,255,255,.12);outline:none;margin:7px 0 5px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,#ffe38a,#ffa63d);border:0;box-shadow:0 0 10px rgba(255,170,60,.65);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#ffa63d;border:0;cursor:pointer}
+.pn{font-size:10.8px;color:var(--mut);line-height:1.4}
+body.nosolve .prm input{opacity:.45;pointer-events:none}
+.fixed{font-size:11px;color:var(--mut);line-height:1.5;padding:6px 2px 4px}
+
+/* right column */
+#pRight{padding:16px}
+.sec{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--mut);margin:0 0 10px;display:flex;justify-content:space-between}
+.sec+.sec{margin-top:16px}
+.rank{display:flex;flex-direction:column;gap:7px}
+.row{position:relative;border:1px solid var(--line);background:rgba(255,255,255,.035);border-radius:11px;padding:9px 11px;cursor:pointer;transition:.2s;overflow:hidden}
+.row:hover,.row.hl{border-color:var(--gold);background:rgba(255,207,77,.09);transform:translateX(-2px)}
+.row .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;position:relative;z-index:1}
+.row .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .v{font-size:14px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.row .meta{font-size:11px;color:var(--mut);margin-top:2px;position:relative;z-index:1}
+.row .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(255,207,77,.22),rgba(255,207,77,0));transition:width .9s cubic-bezier(.2,.8,.2,1);z-index:0}
+.tag{display:inline-block;font-size:9.5px;padding:1px 6px;border-radius:99px;background:rgba(61,245,255,.14);color:var(--cyan);margin-right:6px;text-transform:uppercase;letter-spacing:.5px}
+.empty{color:var(--mut);font-size:12px;padding:8px 2px}
+.mix{display:flex;height:12px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.06)}
+.mix i{display:block;height:100%;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.mixleg{display:flex;flex-direction:column;gap:5px;margin-top:9px;font-size:12px}
+.mixleg div{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#cfd9ea}
+.mixleg span{display:flex;align-items:center;gap:7px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#cfd9ea}
+.legend div{display:flex;align-items:center;gap:9px}
+.sw{width:30px;height:4px;border-radius:2px;flex:none}
+.sw.col{width:9px;height:15px;border-radius:2px;margin:0 10px 0 0;background:linear-gradient(180deg,#ffe38a,#ff9d2e);box-shadow:0 0 10px rgba(255,170,60,.7)}
+
+/* toolbar */
+#pBar{position:absolute;z-index:6;left:50%;top:16px;transform:translateX(-50%) translateY(-10px);display:flex;gap:6px;padding:6px;border-radius:14px}
+body.ready #pBar{transform:translateX(-50%)}
+#pBar button{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 13px;font:inherit;font-size:12px;cursor:pointer;transition:.2s}
+#pBar button:hover{border-color:var(--gold);color:var(--gold)} #pBar button.on{background:rgba(255,207,77,.18);border-color:var(--gold);color:var(--gold)}
+
+/* modal */
+#modal{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:rgba(3,6,12,.7);backdrop-filter:blur(6px)}
+#modal.show{display:grid}
+#modal .card{width:min(660px,92vw);max-height:86vh;overflow:auto;background:#0b111e;border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:0 20px 80px rgba(0,0,0,.6)}
+#modal h2{margin:0 0 4px;font-size:18px} #modal p,#modal li{font-size:13px;line-height:1.55;color:#c5d0e3} #modal ul{padding-left:18px;margin:6px 0 12px}
+#modal .x{float:right;background:none;border:0;color:var(--mut);font-size:22px;cursor:pointer}
+
+/* tooltip */
+.tip{font:13px/1.55 var(--font);background:rgba(8,12,22,.96);color:var(--txt);padding:12px 14px;border:1px solid rgba(255,207,77,.5);border-radius:12px;box-shadow:0 0 28px rgba(255,190,40,.3);min-width:250px;max-width:320px}
+.tip h4{margin:0 0 6px;font-size:14px} .tip hr{border:0;border-top:1px solid rgba(255,255,255,.14);margin:6px 0}
+.tip .r{display:flex;justify-content:space-between;gap:14px} .tip .r span{color:var(--mut)} .tip .big{color:var(--gold);font-weight:700;font-size:15px}
+
+@media (max-width:1180px){ #colL{width:350px} #colR{width:290px} .kpi.hero b{font-size:28px} }
+@media (max-width:900px){ #colR{display:none} }
+@media (max-width:700px){ #colL{width:calc(100vw - 20px);left:10px;top:60px} #pBar{top:8px} }
+@media (max-height:700px){ .insight{display:none} .sub{margin-bottom:8px} }
+.maplibregl-ctrl-attrib{opacity:.55;font-size:10px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="vignette"></div>
+
+<div class="col" id="colL">
+  <div class="panel" id="pLeft">
+    <div class="brand"><div class="logo">&#9889;</div>
+      <div><h1>Biochar Site Finder</h1><div class="sub" id="subtitle"></div></div></div>
+    <div class="kpis">
+      <div class="kpi hero"><div><span>Portfolio NPV</span><b id="kNpv">$0</b></div><div class="delta flat" id="kDelta">default case</div></div>
+      <div class="kpi"><span>Sites opened</span><b id="kSites">0</b></div>
+      <div class="kpi"><span>Annual profit</span><b id="kProfit">0</b></div>
+      <div class="kpi"><span>Payback</span><b id="kPay">0</b></div>
+      <div class="kpi"><span>Biochar / yr</span><b id="kBio">0</b></div>
+      <div class="kpi"><span>Credits / yr</span><b id="kCred">0</b></div>
+      <div class="kpi"><span>CapEx</span><b id="kCapex">0</b></div>
+    </div>
+    <div class="kpi" style="margin-top:8px"><span>Customer demand served</span><b id="kServed" style="font-size:15px"></b><div class="bar"><i id="kBar" style="width:0"></i></div></div>
+    <div class="insight" id="insight"></div>
+    <div id="solveStat" class="busy"><i></i><span>Loading optimizer&hellip;</span></div>
+  </div>
+
+  <div class="panel" id="pAsm">
+    <div class="ahead"><b>Assumptions</b><button class="link" id="btnReset">Reset all</button></div>
+    <p class="asub">Every input below can be changed &mdash; the optimizer re-selects sites live.</p>
+    <div class="keys"><span><i class="tg R">Researched</i> backed by published data</span><span><i class="tg A">Assumption</i> not yet verified</span></div>
+    <div class="chips" id="chips"></div>
+    <div id="groups"></div>
+  </div>
+</div>
+
+<div class="col" id="colR">
+  <div class="panel" id="pRight">
+    <div class="sec"><span>Selected sites</span><span id="rankNote"></span></div>
+    <div class="rank" id="rank"></div>
+    <div class="sec"><span>Where the money comes from</span><span id="mixTotal"></span></div>
+    <div class="mix" id="mix"></div>
+    <div class="mixleg" id="mixLeg"></div>
+    <div class="sec"><span>Legend</span></div>
+    <div class="legend">
+      <div><span class="sw col"></span>Pyrolysis site &mdash; tower height = NPV</div>
+      <div><span class="sw" style="background:linear-gradient(90deg,#46f08a,#ffbe3c)"></span>Wood feedstock &rarr; site</div>
+      <div><span class="sw" style="background:linear-gradient(90deg,#3df5ff,#3b82ff)"></span>Biochar &rarr; buyer</div>
+      <div><span class="dot" style="background:#ffaa28"></span>Wood supplier / candidate site</div>
+      <div><span class="dot" style="background:#3cbeff"></span>Biochar buyer (size = tons received)</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="pBar">
+  <button id="bRot" class="on">&#10227; Rotate</button>
+  <button id="bTop">Reset view</button>
+  <button id="bFlow" class="on">Flow</button>
+  <button id="bInfo">About</button>
+</div>
+<div id="modal"><div class="card" id="modalCard"></div></div>
+
+<script>
+/* ============================ DATA ============================ */
+const D = {"defaults":{"biochar_price":500.0,"credit_price":177.0,"tco2_per_credit":2.0,"co2_per_t":2.8,"yield_pct":27.500000000000004,"tip":35.0,"residue_price":10.0,"capex_per_t":1190.082644628099,"capex_fixed_m":0.5,"opex":12.0,"rent_fixed_k":100.0,"rent_per_t":2.0,"rent_factor":1.5,"truck":2.75,"wood_payload":25.0,"char_payload":20.0,"discount":10.0,"life":15,"budget_m":60.0,"min_util":40.0,"demand_total":21750.0,"supply_scale":1.0},"ref":0.15125000000000002,"base":{"npv":108678930,"capex":27200000,"profit":17864515,"biochar":21750,"credits":30451,"demand":21750,"sites":[{"k":0,"size":"Large","wet":50000,"dry":27500,"bio":7563,"cr":10588,"npv":37424895,"profit":6169393,"capex":9500000,"rb":3781250,"rc":1873988,"tip":1750000},{"k":1,"size":"Medium","wet":30000,"dry":16841,"bio":4631,"cr":6484,"npv":22818764,"profit":3775764,"capex":5900000,"rb":2315625,"rc":1147624,"tip":1050000},{"k":2,"size":"Medium","wet":30000,"dry":18000,"bio":4950,"cr":6930,"npv":25002819,"profit":4062910,"capex":5900000,"rb":2475000,"rc":1226610,"tip":1050000},{"k":4,"size":"Medium","wet":30000,"dry":16750,"bio":4606,"cr":6449,"npv":23432452,"profit":3856448,"capex":5900000,"rb":2303125,"rc":1141429,"tip":1050000}],"wood":[[0,0,50000,0],[1,1,23182,0],[2,1,5000,16],[3,1,1818,27],[2,2,30000,0],[3,4,5000,30],[4,4,25000,0]],"char":[[0,1,3000,376],[0,2,2250,298],[0,5,1800,246],[0,6,513,388],[1,6,131,409],[1,7,2700,84],[1,9,1800,342],[2,3,1394,112],[2,4,1500,71],[2,6,856,425],[2,8,1200,15],[4,0,3750,10],[4,3,856,140]]},"sizes":[{"name":"Small","cap":15000},{"name":"Medium","cap":30000},{"name":"Large","cap":50000}],"suppliers":[{"name":"DSNY Fresh Kills Composting Facility","region":"Downstate","lat":40.58586,"lon":-74.19319,"supply":60000,"moisture":0.45},{"name":"Garden City Compost","region":"Downstate","lat":40.72178,"lon":-73.64408,"supply":25000,"moisture":0.45},{"name":"Omni Recycling of Babylon","region":"Downstate","lat":40.7308,"lon":-73.39634,"supply":35000,"moisture":0.4},{"name":"Carlsoncorp Kings Park","region":"Downstate","lat":40.87867,"lon":-73.28367,"supply":30000,"moisture":0.4},{"name":"Long Island Compost Farm #36","region":"Downstate","lat":40.85226,"lon":-72.83329,"supply":25000,"moisture":0.45},{"name":"Wagner Lumber Co. (Owego)","region":"Upstate","lat":42.1299,"lon":-76.18422,"supply":18000,"moisture":0.5},{"name":"Gutchess Lumber Co. (Cortland)","region":"Upstate","lat":42.58205,"lon":-76.2139,"supply":18000,"moisture":0.5},{"name":"Gutchess Freedom","region":"Upstate","lat":42.46678,"lon":-78.38494,"supply":18000,"moisture":0.5},{"name":"Ward Lumber Co. (Jay)","region":"Upstate","lat":44.36617,"lon":-73.72421,"supply":13500,"moisture":0.5},{"name":"Peter C. Herman Inc. (Marion)","region":"Upstate","lat":43.14956,"lon":-77.12458,"supply":11700,"moisture":0.5}],"sites":[{"name":"DSNY Fresh Kills Composting Facility","lat":40.58586,"lon":-74.19319,"region":"Downstate"},{"name":"Garden City Compost","lat":40.72178,"lon":-73.64408,"region":"Downstate"},{"name":"Omni Recycling of Babylon","lat":40.7308,"lon":-73.39634,"region":"Downstate"},{"name":"Carlsoncorp Kings Park","lat":40.87867,"lon":-73.28367,"region":"Downstate"},{"name":"Long Island Compost Farm #36","lat":40.85226,"lon":-72.83329,"region":"Downstate"},{"name":"Wagner Lumber Co. (Owego)","lat":42.1299,"lon":-76.18422,"region":"Upstate"},{"name":"Gutchess Lumber Co. (Cortland)","lat":42.58205,"lon":-76.2139,"region":"Upstate"},{"name":"Gutchess Freedom","lat":42.46678,"lon":-78.38494,"region":"Upstate"},{"name":"Ward Lumber Co. (Jay)","lat":44.36617,"lon":-73.72421,"region":"Upstate"},{"name":"Peter C. Herman Inc. (Marion)","lat":43.14956,"lon":-77.12458,"region":"Upstate"}],"customers":[{"name":"Long Island Compost - Grucci Lane (Yaphank)","type":"Compost/Soil","lat":40.80158,"lon":-72.92632,"demand":3750.0},{"name":"C.J. Krantz Organic Recycling Center (Amherst)","type":"Compost/Soil","lat":43.0541,"lon":-78.72069,"demand":3000.0},{"name":"Vermi-Green LLC (Palmyra)","type":"Compost/Soil","lat":43.03793,"lon":-77.2564,"demand":2250.0},{"name":"Hurds Farm Compost (Clintondale)","type":"Compost/Soil","lat":41.70516,"lon":-74.06534,"demand":2250.0},{"name":"Montrose Water Treatment Plant (Westchester)","type":"Water Filtration","lat":41.29994,"lon":-73.88404,"demand":1500.0},{"name":"Syracuse Water Treatment Plant (Skaneateles Lake)","type":"Water Filtration","lat":42.94556,"lon":-76.43073,"demand":1800.0},{"name":"Michael C. O'Laughlin Water Plant (Niagara Falls)","type":"Water Filtration","lat":43.07615,"lon":-78.99844,"demand":1500.0},{"name":"Home Depot Distribution Center (Montgomery)","type":"Retail Garden Hub","lat":41.49622,"lon":-74.2428,"demand":2700.0},{"name":"Hicks Nurseries (Westbury)","type":"Retail Garden Hub","lat":40.76322,"lon":-73.59735,"demand":1200.0},{"name":"Eastman Business Park / Li-Cycle (Rochester)","type":"Battery/Industrial","lat":43.20214,"lon":-77.62816,"demand":1800.0}],"dSS":[[0.0,38.96,51.77,63.41,84.47,196.63,221.3,345.58,293.96,298.12],[38.24,0.0,16.6,27.28,48.67,217.1,241.76,366.05,295.4,318.59],[51.05,16.26,0.0,15.31,35.73,233.53,258.2,382.48,311.84,335.02],[63.08,27.49,18.61,0.0,30.26,239.85,264.51,388.8,318.15,341.34],[84.41,49.1,36.72,30.42,0.0,261.5,286.16,410.45,339.8,362.99],[195.47,216.47,233.35,240.82,262.21,0.0,37.5,152.49,267.32,104.43],[220.07,241.07,257.94,265.42,286.81,37.46,0.0,157.03,238.81,81.6],[344.25,365.24,382.12,389.6,410.99,152.67,155.4,0.0,354.92,113.1],[293.37,295.39,312.27,319.75,341.14,267.53,238.02,355.23,0.0,268.47],[297.89,318.89,335.77,343.24,364.64,104.4,81.57,102.78,267.94,0.0]],"dSC":[[76.09,376.2,298.32,93.97,71.09,246.48,388.37,82.45,41.33,321.05],[42.21,396.66,318.78,95.41,54.59,266.94,408.84,83.89,4.77,341.51],[27.35,413.09,335.22,111.84,71.02,283.38,425.27,100.32,15.44,357.95],[23.5,419.41,341.53,118.16,77.34,289.7,431.59,106.64,22.98,364.27],[9.7,441.06,363.18,139.81,98.99,311.35,453.24,128.29,44.29,385.92],[255.45,185.15,107.27,147.36,170.0,67.73,203.63,141.32,218.45,130.0],[280.05,159.67,81.79,171.96,194.6,30.45,171.85,165.92,243.04,104.53],[404.23,50.5,99.69,296.14,318.77,138.58,63.01,290.1,367.22,81.05],[334.38,345.45,267.57,207.31,248.99,226.39,357.63,230.58,297.37,290.3],[357.88,101.02,14.06,276.48,272.42,51.6,113.2,243.74,320.87,32.79]],"lifetime":15};
+const SITES = D.sites, SUP = D.suppliers, CUS = D.customers, SZ = D.sizes;
+const DEF = D.defaults;
+const NOSOLVER = /[?&]nosolver/.test(location.search);
+const short = n => n.replace(/^DSNY /, '').replace(/ Composting Facility/, '').replace(/ Inc\.?$/, '').replace(/ \(.*\)$/, '');
+const fM = v => (v < 0 ? '-$' : '$') + (Math.abs(v) / 1e6).toFixed(1) + 'M';
+const fI = v => Math.round(v).toLocaleString('en-US');
+const fK = v => v >= 1e4 ? (v / 1e3).toFixed(1) + 'k' : fI(v);
+
+/* ---- editable inputs: tag R = researched, A = assumption (not yet verified) ---- */
+const GROUPS = [
+  {id: 'rev', title: 'Revenue & carbon', open: true, items: [
+    {id: 'biochar_price', label: 'Biochar price', unit: '$/t', min: 200, max: 1000, step: 10, tag: 'R', note: 'Bulk biochar quotes span about $300–1,500/t depending on grade and packaging.'},
+    {id: 'credit_price', label: 'Carbon credit price', unit: '$/credit', min: 0, max: 250, step: 1, tag: 'R', note: '2025 market: $125–145 (Puro/Nasdaq index), $150 (Platts); presale offers up to $170.'},
+    {id: 'tco2_per_credit', label: 'Tonnes CO₂ per credit', unit: 't', min: 1, max: 2, step: 0.1, tag: 'R', note: 'Market standard (Puro, Isometric): 1 credit = 1 t CO₂e.'},
+    {id: 'co2_per_t', label: 'CO₂e stored per tonne biochar', unit: 't', min: 2, max: 3.4, step: 0.1, tag: 'R', note: 'Wood biochar 2.6–3.3 (Nebraska Forest Service; Puro audits).'},
+    {id: 'yield_pct', label: 'Biochar yield (dry wood)', unit: '%', min: 15, max: 40, step: 0.5, tag: 'R', note: 'Slow pyrolysis typically 25–30% of dry feed; vendor data ~21% of wet feed.'},
+    {id: 'tip', label: 'Wood intake fee, downstate', unit: '$/t', min: 0, max: 100, step: 1, tag: 'R', note: 'Long Island / CT transfer stations charge $28–40/t for wood chips; NYC yard waste $12.34/yd³.'},
+    {id: 'residue_price', label: 'Sawmill residue price, upstate', unit: '$/t', min: 0, max: 60, step: 1, tag: 'A', note: 'No current NY price found; Northeast outlets have shrunk, so assumed low.'},
+  ]},
+  {id: 'cost', title: 'Plant & operating cost', open: false, items: [
+    {id: 'capex_per_t', label: 'Plant CapEx', unit: '$/annual t biochar', min: 400, max: 3000, step: 10, tag: 'R', note: 'Published projects: about $770–1,700 per annual tonne of biochar capacity.'},
+    {id: 'capex_fixed_m', label: 'Fixed CapEx per site', unit: '$M', min: 0, max: 5, step: 0.1, tag: 'A', note: 'Site preparation, permitting, grid connection.'},
+    {id: 'opex', label: 'Operating cost', unit: '$/wet t', min: 4, max: 40, step: 0.5, tag: 'R', note: 'Calibrated so total production cost is ~$300/t biochar (published range $150–390).'},
+    {id: 'rent_fixed_k', label: 'Site rent & utilities (fixed)', unit: '$k/yr', min: 0, max: 1000, step: 10, tag: 'A', note: 'Co-located at existing yards; no source found.'},
+    {id: 'rent_per_t', label: 'Rent & utilities (variable)', unit: '$/yr per t cap.', min: 0, max: 10, step: 0.5, tag: 'A', note: 'Scales with machine size.'},
+    {id: 'rent_factor', label: 'Downstate rent multiplier', unit: '×', min: 1, max: 3, step: 0.1, tag: 'A', note: 'Higher land cost near New York City.'},
+  ]},
+  {id: 'log', title: 'Logistics', open: false, items: [
+    {id: 'truck', label: 'Trucking cost', unit: '$/loaded mile', min: 1.5, max: 5, step: 0.05, tag: 'R', note: 'ATRI 2025 operating cost $2.34/mi; DAT 2026 dry van ~$2.4, flatbed ~$3.0.'},
+    {id: 'wood_payload', label: 'Wood payload', unit: 't/truck', min: 15, max: 32, step: 1, tag: 'A', note: 'Walking-floor trailer, wet chips.'},
+    {id: 'char_payload', label: 'Biochar payload', unit: 't/truck', min: 10, max: 30, step: 1, tag: 'A', note: 'Biochar is low density.'},
+  ]},
+  {id: 'fin', title: 'Finance', open: false, items: [
+    {id: 'discount', label: 'Discount rate', unit: '%', min: 5, max: 20, step: 0.5, tag: 'R', note: 'Published biochar techno-economic study: 10% real, 12.2% nominal.'},
+    {id: 'life', label: 'Plant life', unit: 'years', min: 5, max: 25, step: 1, tag: 'R', note: 'A published study assumes 20 years; 15 is more conservative for pyrolysis equipment.'},
+    {id: 'budget_m', label: 'Total CapEx budget', unit: '$M', min: 10, max: 150, step: 5, tag: 'A', note: 'Upper limit on capital deployed.'},
+    {id: 'min_util', label: 'Minimum utilisation of an open plant', unit: '%', min: 0, max: 80, step: 5, tag: 'A', note: 'A plant must run at least this share of capacity.'},
+  ]},
+  {id: 'mkt', title: 'Supply & demand', open: false, items: [
+    {id: 'demand_total', label: 'Biochar demand (10 buyers)', unit: 't/yr', min: 5000, max: 60000, step: 250, tag: 'A', note: 'No public New York market-size data found — the biggest unknown.'},
+    {id: 'supply_scale', label: 'Feedstock availability', unit: '×', min: 0.3, max: 2, step: 0.05, tag: 'A', note: 'Supplier volumes are estimates; urban yard volumes are not public.'},
+  ]},
+];
+const ALL = GROUPS.flatMap(g => g.items);
+const PRESETS = [
+  ['Default', {}],
+  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 14500}],
+  ['Market-aligned', {credit_price: 140, tco2_per_credit: 1}],
+  ['No carbon credits', {credit_price: 0}],
+  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 29000}],
+];
+let P = {...DEF};
+let act = D.base;
+const same = (a, b) => ALL.every(it => Math.abs(a[it.id] - b[it.id]) < 1e-9);
+
+/* ============================ MAP ============================ */
+const wide = () => innerWidth > 900;
+const pad = () => ({left: wide() ? Math.min(innerWidth * .28, 410) : 0, right: innerWidth > 900 ? 340 : 0, top: 50, bottom: 10});
+const HOME = () => ({center: [-74.6, 42.0], zoom: innerWidth < 1250 ? 5.5 : 5.9, pitch: 52, bearing: -14, padding: pad()});
+const map = new maplibregl.Map({
+  container: 'map', style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  center: [-75.5, 43.0], zoom: 4.3, pitch: 0, bearing: 0, maxPitch: 75, attributionControl: {compact: true}
+});
+const overlay = new deck.MapboxOverlay({interleaved: false, layers: [], getTooltip});
+map.addControl(overlay);
+map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), 'bottom-right');
+
+/* ============================ LAYERS ============================ */
+const TOWER_M = 120000, REF_NPV = 70e6;
+const ease = t => 1 - Math.pow(1 - t, 3);
+const TR = ms => ({duration: ms, easing: ease});
+const GLOW = {blend: true, blendColorSrcFactor: 'src-alpha', blendColorDstFactor: 'one', blendAlphaSrcFactor: 'one', blendAlphaDstFactor: 'one'};
+let hoverSite = -1, flowOn = true, rotateOn = true, introDone = false;
+
+const woodPairs = [], charPairs = [];
+SUP.forEach((s, i) => SITES.forEach((k, ki) => { if (i !== ki) woodPairs.push({i, k: ki, s: [s.lon, s.lat], t: [k.lon, k.lat]}); }));
+SITES.forEach((k, ki) => CUS.forEach((c, j) => charPairs.push({k: ki, j, s: [k.lon, k.lat], t: [c.lon, c.lat]})));
+
+let siteAct, woodAct, charAct, recv, openList, scKey = 0;
+function index() {
+  scKey++;
+  siteAct = new Map(act.sites.map(x => [x.k, x]));
+  woodAct = new Map(act.wood.map(x => [x[0] + '-' + x[1], x]));
+  charAct = new Map(act.char.map(x => [x[0] + '-' + x[1], x]));
+  recv = new Array(CUS.length).fill(0); act.char.forEach(x => recv[x[1]] += x[2]);
+  openList = act.sites.map(x => ({...SITES[x.k], k: x.k, ...x}));
+  buildStreams();
+}
+const elevOf = k => siteAct.has(k) ? Math.min(Math.max(siteAct.get(k).npv, 0), 1.5 * REF_NPV) / REF_NPV * TOWER_M : 0;
+const topPos = d => [d.lon, d.lat, elevOf(d.k) + 3000];
+
+function buildLayers(time) {
+  const ph = (time / 2600) % 1, ph2 = (ph + .5) % 1;
+  const hv = hoverSite, zoomNow = map.getZoom();
+  const L = [];
+  L.push(new deck.ArcLayer({id: 'wood', data: woodPairs, pickable: true, getSourcePosition: d => d.s, getTargetPosition: d => d.t,
+    getSourceColor: [70, 240, 140, 235], getTargetColor: [255, 190, 60, 235], getHeight: .55, greatCircle: false,
+    getWidth: d => { const a = woodAct.get(d.i + '-' + d.k); return a ? 2 + a[2] / 3200 : 0; },
+    transitions: {getWidth: TR(900)}, updateTriggers: {getWidth: [scKey]}, parameters: GLOW}));
+  L.push(new deck.ArcLayer({id: 'char', data: charPairs, pickable: true, getSourcePosition: d => d.s, getTargetPosition: d => d.t,
+    getSourceColor: [61, 245, 255, 245], getTargetColor: [59, 130, 255, 245], getHeight: .5, greatCircle: false,
+    getWidth: d => { const a = charAct.get(d.k + '-' + d.j); return a ? 1.5 + a[2] / 800 : 0; },
+    transitions: {getWidth: TR(900)}, updateTriggers: {getWidth: [scKey]}, parameters: GLOW}));
+  L.push(new deck.ScatterplotLayer({id: 'sup', data: SUP.map((s, i) => ({...s, i})), pickable: true, getPosition: d => [d.lon, d.lat],
+    getRadius: d => siteAct.has(d.i) ? 9 : 5.5, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.2,
+    getFillColor: d => siteAct.has(d.i) ? [255, 200, 70, 255] : [255, 170, 40, 170], getLineColor: [255, 215, 120, 230],
+    transitions: {getRadius: TR(700)}, updateTriggers: {getRadius: [scKey], getFillColor: [scKey]}}));
+  L.push(new deck.ScatterplotLayer({id: 'cus', data: CUS.map((c, j) => ({...c, j})), pickable: true, getPosition: d => [d.lon, d.lat],
+    getRadius: d => 4.5 + Math.sqrt(recv[d.j]) / 5.5, radiusUnits: 'pixels', stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.2,
+    getFillColor: d => recv[d.j] > 0 ? [70, 200, 255, 245] : [70, 200, 255, 90], getLineColor: [170, 235, 255, 240],
+    transitions: {getRadius: TR(700)}, updateTriggers: {getRadius: [scKey], getFillColor: [scKey]}}));
+  if (flowOn && streams.length) {
+    const pd = particleData(time);
+    L.push(new deck.ScatterplotLayer({id: 'flowGlow', data: pd, getPosition: d => d.pos, getRadius: d => d.r * 2.6, radiusUnits: 'pixels',
+      getFillColor: d => [...d.col, d.a * .28], parameters: GLOW, updateTriggers: {getPosition: [time], getFillColor: [time]}}));
+    L.push(new deck.ScatterplotLayer({id: 'flow', data: pd, getPosition: d => d.pos, getRadius: d => d.r, radiusUnits: 'pixels',
+      getFillColor: d => [...d.col, d.a], parameters: GLOW, updateTriggers: {getPosition: [time], getFillColor: [time]}}));
+  }
+  if (openList.length) L.push(new deck.ScatterplotLayer({id: 'pulse', data: openList.flatMap(d => [{...d, p: ph}, {...d, p: ph2}]),
+    getPosition: d => [d.lon, d.lat], getRadius: d => 6000 + d.p * 42000, filled: false, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 2,
+    getLineColor: d => [255, 207, 77, 210 * (1 - d.p)], parameters: GLOW, updateTriggers: {getRadius: [time], getLineColor: [time]}}));
+  const colData = SITES.map((s, k) => ({...s, k}));
+  L.push(new deck.ColumnLayer({id: 'halo', data: colData, getPosition: d => [d.lon, d.lat], diskResolution: 28, radius: 27000, extruded: true, material: false,
+    getElevation: d => elevOf(d.k), getFillColor: d => [255, 190, 50, d.k === hv ? 70 : 38], transitions: {getElevation: TR(1100)},
+    updateTriggers: {getElevation: [scKey], getFillColor: [hv]}, parameters: GLOW}));
+  L.push(new deck.ColumnLayer({id: 'core', data: colData, pickable: true, autoHighlight: true, highlightColor: [255, 255, 255, 255],
+    getPosition: d => [d.lon, d.lat], diskResolution: 28, radius: 13000, extruded: true, material: false,
+    getElevation: d => elevOf(d.k), getFillColor: d => d.k === hv ? [255, 245, 190, 255] : [255, 214, 95, 240],
+    transitions: {getElevation: TR(1100)}, updateTriggers: {getElevation: [scKey], getFillColor: [hv]}}));
+  const lab = {fontFamily: 'Segoe UI, Inter, Arial, sans-serif', billboard: true, sizeUnits: 'pixels', characterSet: 'auto'};
+  const byLon = [...openList].sort((a, b) => a.lon - b.lon), n = byLon.length, slot = new Map(byLon.map((d, i) => [d.k, i]));
+  const showName = zoomNow > 6.9;
+  L.push(new deck.TextLayer({...lab, id: 'lbl', data: colData, getPosition: topPos,
+    getText: d => siteAct.has(d.k) ? (showName || d.k === hv ? short(d.name) + '\n' : '') + fM(siteAct.get(d.k).npv) : '',
+    getSize: 16, getColor: [255, 226, 130, 255], fontWeight: 800, getTextAnchor: 'middle', getAlignmentBaseline: 'bottom',
+    getPixelOffset: d => { const i = slot.get(d.k) ?? 0; return [(i - (n - 1) / 2) * 64, -26 - (i % 2) * 44]; },
+    background: true, getBackgroundColor: [8, 12, 22, 225], backgroundPadding: [10, 5, 10, 5], getBorderColor: [255, 207, 77, 210], getBorderWidth: 1,
+    transitions: {getPosition: TR(1100)}, updateTriggers: {getText: [scKey, showName, hv], getPosition: [scKey], getPixelOffset: [scKey]}}));
+  return L;
+}
+
+/* ---- flow particles ride exactly on deck's ArcLayer geometry (paraboloid, smoothstepped ratio, mercator lerp) ---- */
+const RAD = Math.PI / 180, mercY = lat => Math.log(Math.tan(Math.PI / 4 + lat * RAD / 2)), unmercY = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / RAD;
+function gdist(a, b) { const dl = (b[0] - a[0]) * RAD, dp = (b[1] - a[1]) * RAD, h = Math.sin(dp / 2) ** 2 + Math.cos(a[1] * RAD) * Math.cos(b[1] * RAD) * Math.sin(dl / 2) ** 2; return 2 * 6371000 * Math.asin(Math.sqrt(h)); }
+function arcPoint(a, b, u, h, dm) {
+  const r = u * u * (3 - 2 * u);
+  return [a[0] + (b[0] - a[0]) * r, unmercY(mercY(a[1]) + (mercY(b[1]) - mercY(a[1])) * r), Math.sqrt(r * (1 - r)) * h * dm];
+}
+let streams = [];
+function buildStreams() {
+  streams = [];
+  const add = (a, b, tons, kind, h, perT) => {
+    const dm = gdist(a, b), n = Math.max(1, Math.min(5, Math.round(tons / perT))), dur = 3800 + dm / 1000 * 16;
+    for (let q = 0; q < n; q++) streams.push({a, b, h, dm, kind, dur, off: q / n + (a[0] * 7.31 % 1 + 1) % 1 * .13});
+  };
+  act.wood.forEach(([i, k, t]) => { if (i !== k) add([SUP[i].lon, SUP[i].lat], [SITES[k].lon, SITES[k].lat], t, 'w', .55, 4000); });
+  act.char.forEach(([k, j, t]) => add([SITES[k].lon, SITES[k].lat], [CUS[j].lon, CUS[j].lat], t, 'c', .5, 900));
+}
+function particleData(time) {
+  const out = [];
+  for (const s of streams) for (let t = 0; t < 5; t++) {
+    const u = (((time / s.dur + s.off - t * .012) % 1) + 1) % 1, pos = arcPoint(s.a, s.b, u, s.h, s.dm);
+    const col = s.kind === 'w' ? [70 + 185 * u, 240 - 50 * u, 140 - 80 * u] : [61 - 2 * u, 245 - 115 * u, 255];
+    out.push({pos, r: t === 0 ? 7 : 5.4 - t * .9, a: t === 0 ? 255 : 150 - t * 32, col});
+  }
+  return out;
+}
+
+/* ============================ TOOLTIP ============================ */
+function row(a, b) { return `<div class="r"><span>${a}</span><b>${b}</b></div>`; }
+function getTooltip({object, layer}) {
+  if (!object || !layer) return null;
+  let html = null;
+  if (layer.id === 'core') {
+    const s = siteAct.get(object.k); if (!s) return null;
+    html = `<h4>${object.name}</h4><hr>` + row('Machine size', `${s.size} (${fI(SZ.find(z => z.name === s.size).cap)} t/yr)`) +
+      row('Tons processed / yr', `${fI(s.wet)} wet t (${fI(s.dry)} dry)`) + row('Biochar produced', `${fI(s.bio)} t/yr`) +
+      row('Carbon credits generated', `${fI(s.cr)} / yr`) + row('Annual profit', fM(s.profit)) + row('CapEx', fM(s.capex)) +
+      `<hr><div class="r"><span>Net present value</span><span class="big">${fM(s.npv)}</span></div>`;
+  } else if (layer.id === 'sup') {
+    html = `<h4>${object.name}</h4><hr>` + row('Wood supplier', object.region) + row('Supply', fI(object.supply * P.supply_scale) + ' wet t/yr') + row('Moisture', Math.round(object.moisture * 100) + '%');
+  } else if (layer.id === 'cus') {
+    html = `<h4>${object.name}</h4><hr>` + row('Buyer type', object.type) + row('Demand', fI(object.demand * P.demand_total / DEF.demand_total) + ' t/yr') + row('Receiving now', fI(recv[object.j]) + ' t/yr');
+  } else if (layer.id === 'wood') {
+    const a = woodAct.get(object.i + '-' + object.k); if (!a) return null;
+    html = `<h4>Wood feedstock</h4><hr>${SUP[object.i].name}<br>&rarr; ${SITES[object.k].name}<hr>` + row('Volume', fI(a[2]) + ' wet t/yr') + row('Road distance', fI(a[3]) + ' mi');
+  } else if (layer.id === 'char') {
+    const a = charAct.get(object.k + '-' + object.j); if (!a) return null;
+    html = `<h4>Biochar delivery</h4><hr>${SITES[object.k].name}<br>&rarr; ${CUS[object.j].name}<hr>` + row('Volume', fI(a[2]) + ' t/yr') + row('Road distance', fI(a[3]) + ' mi');
+  }
+  return html && {html: `<div class="tip">${html}</div>`, style: {background: 'transparent', border: 'none', padding: 0, boxShadow: 'none'}};
+}
+
+/* ============================ LIVE OPTIMIZER (HiGHS compiled to WebAssembly) ============================ */
+let highsP = null, solverOK = false;
+function loadSolver() {
+  if (NOSOLVER) return Promise.reject(new Error('disabled'));
+  return highsP || (highsP = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = 'https://unpkg.com/highs@1.8.0/build/highs.js';
+    s.onload = () => window.Module({locateFile: f => 'https://unpkg.com/highs@1.8.0/build/' + f}).then(res, rej);
+    s.onerror = () => rej(new Error('script load failed')); document.head.appendChild(s);
+  }));
+}
+const num = v => (v < 0 ? '- ' : '+ ') + Math.abs(v).toFixed(8);
+/* Same MILP as optimize.py: choose which sites to open (and machine size), wood flows x[i,k], biochar flows z[k,j]. Maximise NPV. */
+function buildLP(Q) {
+  const nI = SUP.length, nK = SITES.length, nJ = CUS.length, nS = SZ.length;
+  const r = Q.discount / 100, A = r > 0 ? (1 - Math.pow(1 + r, -Q.life)) / r : Q.life;
+  const capexWet = Q.capex_per_t * D.ref;
+  const capexS = SZ.map(s => Q.capex_fixed_m * 1e6 + capexWet * s.cap);
+  const rent = (k, s) => (Q.rent_fixed_k * 1e3 + Q.rent_per_t * SZ[s].cap) * (SITES[k].region === 'Downstate' ? Q.rent_factor : 1);
+  const price = SUP.map(s => s.region === 'Downstate' ? -Q.tip : Q.residue_price);
+  const conv = SUP.map(s => (1 - s.moisture) * Q.yield_pct / 100);
+  const supply = SUP.map(s => s.supply * Q.supply_scale);
+  const demand = CUS.map(c => c.demand * Q.demand_total / DEF.demand_total);
+  const cps = Q.co2_per_t / Q.tco2_per_credit, creditPerT = cps * Q.credit_price;
+  const tw = (i, k) => D.dSS[i][k] * Q.truck / Q.wood_payload, tc = (k, j) => D.dSC[k][j] * Q.truck / Q.char_payload;
+  const obj = [], cons = [], bin = [];
+  for (let i = 0; i < nI; i++) for (let k = 0; k < nK; k++) obj.push(num(-A * (price[i] + tw(i, k) + Q.opex)) + ` x_${i}_${k}`);
+  for (let k = 0; k < nK; k++) for (let j = 0; j < nJ; j++) obj.push(num(A * (Q.biochar_price + creditPerT - tc(k, j))) + ` z_${k}_${j}`);
+  for (let k = 0; k < nK; k++) for (let s = 0; s < nS; s++) { obj.push(num(-A * rent(k, s) - capexS[s]) + ` y_${k}_${s}`); bin.push(`y_${k}_${s}`); }
+  const xs = (i, k) => `x_${i}_${k}`;
+  for (let i = 0; i < nI; i++) cons.push(` sup_${i}: ` + [...Array(nK).keys()].map(k => '+ ' + xs(i, k)).join(' ') + ` <= ${supply[i].toFixed(4)}`);
+  for (let k = 0; k < nK; k++) {
+    const win = [...Array(nI).keys()].map(i => '+ ' + xs(i, k)).join(' ');
+    cons.push(` cap_${k}: ${win} ` + SZ.map((s, si) => `- ${s.cap} y_${k}_${si}`).join(' ') + ' <= 0');
+    cons.push(` min_${k}: ${win} ` + SZ.map((s, si) => `- ${(Q.min_util / 100 * s.cap).toFixed(4)} y_${k}_${si}`).join(' ') + ' >= 0');
+    cons.push(` bal_${k}: ` + [...Array(nJ).keys()].map(j => `+ z_${k}_${j}`).join(' ') + ' ' + [...Array(nI).keys()].map(i => `- ${conv[i].toFixed(8)} ${xs(i, k)}`).join(' ') + ' = 0');
+    cons.push(` one_${k}: ` + SZ.map((s, si) => `+ y_${k}_${si}`).join(' ') + ' <= 1');
+  }
+  for (let j = 0; j < nJ; j++) cons.push(` dem_${j}: ` + [...Array(nK).keys()].map(k => `+ z_${k}_${j}`).join(' ') + ` <= ${demand[j].toFixed(4)}`);
+  cons.push(' budget: ' + [...Array(nK).keys()].flatMap(k => SZ.map((s, si) => `+ ${capexS[si].toFixed(2)} y_${k}_${si}`)).join(' ') + ` <= ${(Q.budget_m * 1e6).toFixed(2)}`);
+  const wrapTerms = t => { const o = []; for (let i = 0; i < t.length; i += 6) o.push('  ' + t.slice(i, i + 6).join(' ')); return o.join('\n'); };
+  const body = 'Maximize\n obj:\n' + wrapTerms(obj) + '\nSubject To\n' + cons.map(c => { const m = c.match(/^( *[A-Za-z_0-9]+:)(.*?)((?: <=| >=| =) .*)$/); const t = m[2].trim().split(/ (?=[+-] )/); return m[1] + '\n' + wrapTerms(t) + ' ' + m[3].trim(); }).join('\n') + '\n';
+  return {body, ys: bin, A, capexS, rent, price, tw, tc, creditPerT, cps, demand, nI, nK, nJ, nS};
+}
+/* The MIP engine in this WebAssembly build crashes on this model, so branch-and-bound is done here:
+   every node is a linear relaxation solved by HiGHS; branching is on the 0/1 'open site k with machine size s' variables.
+   Phase 1 dives from the root relaxation (a handful of LP solves, ~100 ms) so the screen updates at once; phase 2 searches best-first
+   until the answer is proven optimal (or a time limit is hit). A newer edit cancels the search. */
+function nodeLP(M, fix) {
+  let b = 'Bounds\n';
+  for (const y of M.ys) b += fix[y] === undefined ? ` 0 <= ${y} <= 1\n` : ` ${y} = ${fix[y]}\n`;
+  return M.body + b + 'End\n';
+}
+const tick = () => new Promise(r => setTimeout(r, 0));
+async function branchAndBound(M, hooks, limitMs = 6000, gap = 1e-4) {
+  const highs = await loadSolver(), t0 = performance.now();
+  let best = null, bestObj = -Infinity, nodes = 0, rootBound = null, timedOut = false, stopped = false;
+  const lp = fix => { nodes++; try { const r = highs.solve(nodeLP(M, fix)); return r.Status === 'Optimal' ? r : null; } catch (e) { return null; } };
+  const take = (sol, tag) => { if (!best || sol.ObjectiveValue > bestObj) { best = sol; bestObj = sol.ObjectiveValue; if (hooks.onIncumbent) hooks.onIncumbent(sol, tag); } };
+  const root = lp({});
+  if (root) {
+    rootBound = root.ObjectiveValue;
+    const fixD = {};                                   // phase 1: dive - repeatedly fix the largest fractional 0/1 variable to 1
+    let cur = root, guard = 0;
+    while (cur && guard++ < 40) {
+      let pick = null, pv = 0;
+      for (const y of M.ys) { if (fixD[y] !== undefined) continue; const v = cur.Columns[y].Primal; if (v > 1e-6 && v < 1 - 1e-6 && v > pv) { pv = v; pick = y; } }
+      if (!pick) { take(cur, 'rounded'); break; }
+      fixD[pick] = 1; let nxt = lp(fixD);
+      if (!nxt) { fixD[pick] = 0; nxt = lp(fixD); }
+      cur = nxt;
+    }
+    const open = [{fix: {}, ub: root.ObjectiveValue, sol: root}];
+    let n = 0;
+    while (open.length) {
+      if (hooks.stale()) { stopped = true; break; }
+      if (performance.now() - t0 > limitMs) { timedOut = true; break; }
+      if (++n % 8 === 0) await tick();                 // keep the page responsive and let new edits cancel this search
+      let bi = 0; for (let i = 1; i < open.length; i++) if (open[i].ub > open[bi].ub) bi = i;
+      const node = open.splice(bi, 1)[0];
+      if (best && node.ub <= bestObj + gap * Math.abs(bestObj)) continue;
+      const sol = node.sol || lp(node.fix); if (!sol) continue;
+      const z = sol.ObjectiveValue;
+      if (best && z <= bestObj + gap * Math.abs(bestObj)) continue;
+      let pick = null, pf = 1e-6;
+      for (const y of M.ys) { const v = sol.Columns[y].Primal, f = Math.min(v, 1 - v); if (f > pf) { pf = f; pick = y; } }
+      if (!pick) { take(sol, 'integer'); continue; }
+      open.push({fix: {...node.fix, [pick]: 0}, ub: z}); open.push({fix: {...node.fix, [pick]: 1}, ub: z});
+    }
+  }
+  return {sol: best, nodes, timedOut, stopped, rootBound, ms: Math.round(performance.now() - t0)};
+}
+function assemble(M, Q, sol, info) {
+  const g = n => (sol.Columns[n] ? sol.Columns[n].Primal : 0);
+  const sites = [], wood = [], char = [];
+  for (let k = 0; k < M.nK; k++) {
+    let si = -1; for (let s = 0; s < M.nS; s++) if (g(`y_${k}_${s}`) > .5) si = s;
+    if (si < 0) continue;
+    let wet = 0, dry = 0, tip = 0, buy = 0, trk = 0, bio = 0, sales = 0;
+    for (let i = 0; i < M.nI; i++) {
+      const x = g(`x_${i}_${k}`); if (x < 1e-6) continue;
+      wet += x; dry += x * (1 - SUP[i].moisture); trk += x * M.tw(i, k);
+      if (M.price[i] < 0) tip += -x * M.price[i]; else buy += x * M.price[i];
+      if (x > 1) wood.push([i, k, Math.round(x), Math.round(D.dSS[i][k])]);
+    }
+    for (let j = 0; j < M.nJ; j++) {
+      const z = g(`z_${k}_${j}`); if (z < 1e-6) continue;
+      bio += z; sales += z * Q.biochar_price; trk += z * M.tc(k, j);
+      if (z > 1) char.push([k, j, Math.round(z), Math.round(D.dSC[k][j])]);
+    }
+    const credits = bio * M.cps, credRev = credits * Q.credit_price, opex = wet * Q.opex + M.rent(k, si);
+    const profit = sales + credRev + tip - buy - trk - opex, npv = M.A * profit - M.capexS[si];
+    sites.push({k, size: SZ[si].name, wet: Math.round(wet), dry: Math.round(dry), bio: Math.round(bio), cr: Math.round(credits), npv: Math.round(npv),
+      profit: Math.round(profit), capex: Math.round(M.capexS[si]), rb: Math.round(sales), rc: Math.round(credRev), tip: Math.round(tip)});
+  }
+  const sum = f => sites.reduce((a, s) => a + s[f], 0);
+  return {...info, npv: sum('npv'), capex: sum('capex'), profit: sum('profit'), biochar: sum('bio'), credits: sum('cr'),
+    demand: Math.round(M.demand.reduce((a, b) => a + b, 0)), sites, wood, char};
+}
+async function solveLive(Q, hooks = {stale: () => false}) {
+  const M = buildLP(Q);
+  const bb = await branchAndBound(M, {stale: hooks.stale, onIncumbent: (sol, tag) => { if (hooks.onProgress && tag === 'rounded') hooks.onProgress(assemble(M, Q, sol, {approx: true})); }});
+  if (bb.stopped) return null;
+  return assemble(M, Q, bb.sol || {Columns: {}}, {nodes: bb.nodes, timedOut: bb.timedOut, ms: bb.ms, bound: bb.rootBound});
+}
+
+/* ============================ UI ============================ */
+const $ = id => document.getElementById(id);
+const counters = {};
+function countTo(id, to, fmt, dur = 900) {
+  const el = $(id), from = counters[id] ?? 0; counters[id] = to; const t0 = performance.now();
+  const tick = now => { const p = Math.min(1, (now - t0) / dur), e = ease(p); el.textContent = fmt(from + (to - from) * e); if (p < 1) requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+  setTimeout(() => { if (counters[id] === to) el.textContent = fmt(to); }, dur + 150);   // fallback when animation frames are paused (background tab)
+}
+const dp = it => it.step < 1 ? (String(it.step).split('.')[1] || '').length : 0;
+function buildControls() {
+  $('groups').innerHTML = GROUPS.map(g => `<details class="grp" ${g.open ? 'open' : ''}><summary><span>${g.title}<small>${g.items.filter(i => i.tag === 'R').length} researched &middot; ${g.items.filter(i => i.tag === 'A').length} assumed</small></span></summary>` +
+    g.items.map(it => `<div class="prm" data-id="${it.id}"><div class="ph"><span class="pl">${it.label}<i class="tg ${it.tag}">${it.tag === 'R' ? 'Researched' : 'Assumption'}</i></span>
+      <span class="pv"><input type="number" min="${it.min}" max="${it.max}" step="${it.step}"><u style="text-decoration:none">${it.unit}</u></span></div>
+      <input type="range" min="${it.min}" max="${it.max}" step="${it.step}"><div class="pn">${it.note}</div></div>`).join('') + '</details>').join('') +
+    `<details class="grp"><summary><span>Fixed in this model</span></summary><div class="fixed">Locations are real New York facilities (NYS DEC data). Road distances come from OpenStreetMap routing. Machine options: ${SZ.map(z => z.name + ' ' + fK(z.cap) + ' t/yr').join(', ')} of feedstock.</div></details>`;
+  document.querySelectorAll('.prm').forEach(el => {
+    const it = ALL.find(i => i.id === el.dataset.id), rg = el.querySelector('[type=range]'), nb = el.querySelector('[type=number]');
+    const commit = v => { v = Math.min(it.max, Math.max(it.min, +v)); if (isNaN(v)) return; P[it.id] = v; syncInputs(); schedule(); };
+    rg.oninput = () => commit(rg.value);
+    nb.onchange = () => commit(nb.value);
+  });
+  $('chips').innerHTML = ''; PRESETS.forEach(([n, o], i) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = n; b.dataset.i = i; b.onclick = () => { P = {...DEF, ...o}; syncInputs(); schedule(); }; $('chips').appendChild(b); });
+}
+function syncInputs() {
+  document.querySelectorAll('.prm').forEach(el => {
+    const it = ALL.find(i => i.id === el.dataset.id), v = P[it.id];
+    el.querySelector('[type=range]').value = v; const nb = el.querySelector('[type=number]'); if (document.activeElement !== nb) nb.value = (+v).toFixed(dp(it));
+    el.classList.toggle('chg', Math.abs(v - DEF[it.id]) > 1e-9);
+  });
+  document.querySelectorAll('.chip').forEach(b => b.classList.toggle('on', same(P, {...DEF, ...PRESETS[b.dataset.i][1]})));
+}
+function setStat(cls, txt) { const s = $('solveStat'); s.className = cls; s.querySelector('span').textContent = txt; }
+let timer = null, seq = 0;
+function schedule() {
+  if (!solverOK) return;
+  clearTimeout(timer); setStat('busy', 'Re-optimising…');
+  timer = setTimeout(async () => {
+    const my = ++seq, t0 = performance.now(), stale = () => my !== seq;
+    try {
+      const res = await solveLive({...P}, {stale, onProgress: r => { if (stale()) return; act = r; index(); render(); setStat('busy', 'Refining to the proven optimum…'); }});
+      if (!res || stale()) return;
+      act = res; index(); render();
+      setStat('ok', `Live optimizer · optimum proven in ${Math.round(performance.now() - t0)} ms (${res.nodes} LP solves${res.timedOut ? ', time limit - best found' : ''})`);
+    } catch (e) { console.error(e); setStat('off', 'Optimizer error — see console'); }
+  }, 140);
+}
+function render() {
+  const baseNpv = D.base.npv, n = act.sites.length, isDef = same(P, DEF);
+  countTo('kNpv', act.npv, fM); countTo('kSites', n, v => Math.round(v)); countTo('kProfit', act.profit, fM);
+  countTo('kPay', n ? act.capex / act.profit : 0, v => n ? v.toFixed(1) + ' yrs' : '—');
+  countTo('kBio', act.biochar, v => fK(v) + ' t'); countTo('kCred', act.credits, v => fK(v)); countTo('kCapex', act.capex, fM);
+  const pct = baseNpv ? (act.npv - baseNpv) / baseNpv * 100 : 0, dl = $('kDelta');
+  dl.className = 'delta ' + (isDef || Math.abs(pct) < .05 ? 'flat' : pct > 0 ? 'up' : 'down');
+  dl.textContent = isDef || Math.abs(pct) < .05 ? 'default case' : (pct > 0 ? '▲ +' : '▼ ') + pct.toFixed(0) + '% vs default';
+  const served = act.demand ? Math.min(100, act.biochar / act.demand * 100) : 0, shown = Math.min(act.biochar, act.demand);
+  $('kServed').textContent = `${fI(shown)} of ${fI(act.demand)} t  (${served.toFixed(0)}%)`; $('kBar').style.width = served + '%';
+  const lim = served > 97 ? 'Customer demand is the binding constraint &mdash; more buyers, not more machines, is what unlocks upside.' : 'Capacity or budget is the binding constraint &mdash; unmet demand remains.';
+  $('insight').innerHTML = n === 0 ? 'No site clears the investment hurdle under these assumptions.' : `<b>${n} site${n > 1 ? 's' : ''}</b> selected, <b>${fM(act.npv)}</b> NPV over ${P.life} yrs. ${lim}`;
+  $('subtitle').textContent = `New York State · 30-node optimization · ${P.life}-yr NPV @ ${(+P.discount).toFixed(1).replace(/\.0$/, '')}%`;
+  const sorted = [...act.sites].sort((a, b) => b.npv - a.npv), mx = sorted[0]?.npv || 1;
+  $('rankNote').textContent = n + ' of ' + SITES.length;
+  $('rank').innerHTML = n ? sorted.map(s => `<div class="row" data-k="${s.k}"><div class="fill" style="width:${Math.max(0, s.npv) / mx * 100}%"></div>
+     <div class="top"><span class="nm">${short(SITES[s.k].name)}</span><span class="v">${fM(s.npv)}</span></div>
+     <div class="meta"><span class="tag">${s.size}</span>${fK(s.wet)} t in &middot; ${fK(s.bio)} t biochar &middot; ${fK(s.cr)} cr</div></div>`).join('') : '<div class="empty">No sites selected.</div>';
+  $('rank').querySelectorAll('.row').forEach(r => {
+    const k = +r.dataset.k;
+    r.onmouseenter = () => { hoverSite = k; r.classList.add('hl'); }; r.onmouseleave = () => { hoverSite = -1; r.classList.remove('hl'); };
+    r.onclick = () => { stopRotate(); map.flyTo({center: [SITES[k].lon, SITES[k].lat], zoom: 8.3, pitch: 62, bearing: -25, padding: pad(), duration: 2200, essential: true}); };
+  });
+  const rb = act.sites.reduce((a, s) => a + s.rb, 0), rc = act.sites.reduce((a, s) => a + s.rc, 0), tp = act.sites.reduce((a, s) => a + s.tip, 0), tot = rb + rc + tp || 1;
+  const parts = [['Biochar sales', rb, '#ffcf4d'], ['Carbon credits', rc, '#46f08a'], ['Tipping fees (wood intake)', tp, '#3b82ff']];
+  $('mix').innerHTML = parts.map(p => `<i style="width:${p[1] / tot * 100}%;background:${p[2]}"></i>`).join('');
+  $('mixLeg').innerHTML = parts.map(p => `<div><span><i class="dot" style="background:${p[2]}"></i>${p[0]}</span><b>${fM(p[1])} <small style="color:var(--mut);font-weight:500">${(p[1] / tot * 100).toFixed(0)}%</small></b></div>`).join('');
+  $('mixTotal').textContent = fM(tot) + ' / yr';
+}
+
+/* ============================ CAMERA + CONTROLS ============================ */
+function stopRotate() { rotateOn = false; $('bRot').classList.remove('on'); }
+['mousedown', 'wheel', 'touchstart'].forEach(ev => $('map').addEventListener(ev, () => { if (rotateOn) stopRotate(); }, {passive: true}));
+$('bRot').onclick = () => { rotateOn = !rotateOn; $('bRot').classList.toggle('on', rotateOn); };
+$('bFlow').onclick = () => { flowOn = !flowOn; $('bFlow').classList.toggle('on', flowOn); };
+$('bTop').onclick = () => { map.flyTo({...HOME(), duration: 2200, essential: true}); };
+$('btnReset').onclick = () => { P = {...DEF}; syncInputs(); schedule(); };
+$('bInfo').onclick = () => { $('modal').classList.add('show'); };
+$('modal').onclick = e => { if (e.target.id === 'modal' || e.target.classList.contains('x')) $('modal').classList.remove('show'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('modal').classList.remove('show'); });
+function buildModal() {
+  const nR = ALL.filter(i => i.tag === 'R').length, nA = ALL.length - nR;
+  $('modalCard').innerHTML = `<button class="x">&times;</button><h2>About this model</h2>
+  <p>The map shows where to place biomass-to-biochar plants in New York State so that portfolio net present value is highest. A mixed-integer optimizer (HiGHS) decides which sites to open, what machine size to install, and how wood and biochar flow by road. It runs live in your browser, so every change below re-selects the sites.</p>
+  <ul><li><b>Real data:</b> facility locations (NYS DEC), road distances (OpenStreetMap routing), and published figures for prices, costs and carbon accounting.</li>
+  <li><b>${nR} inputs are researched</b> and tagged <i class="tg R">Researched</i>; the note under each gives the evidence range.</li>
+  <li><b>${nA} inputs are assumptions</b> and tagged <i class="tg A">Assumption</i> &mdash; no reliable public data was found. The largest is buyer demand, which determines how many plants are worthwhile.</li>
+  <li>Locations of buyers and suppliers are fixed; everything else can be changed.</li></ul>
+  <p style="color:#8ea0bb;font-size:12px">Prototype for discussion. Not investment advice.</p>`;
+}
+
+let lastT = performance.now();
+function frame(now) {
+  const dt = now - lastT; lastT = now;
+  if (rotateOn && introDone) map.setBearing(map.getBearing() + dt * 0.0045);
+  overlay.setProps({layers: buildLayers(flowOn ? now : 0)});
+  requestAnimationFrame(frame);
+}
+buildControls(); buildModal(); index(); syncInputs(); render();
+setTimeout(() => document.body.classList.add('ready'), 250);
+map.flyTo({...HOME(), duration: 4200, essential: true});
+map.once('moveend', () => { introDone = true; });
+requestAnimationFrame(frame);
+loadSolver().then(() => { solverOK = true; setStat('ok', 'Live optimizer ready — change any assumption'); })
+  .catch(e => { document.body.classList.add('nosolve'); setStat('off', NOSOLVER ? 'Optimizer disabled (test mode) — showing the default case' : 'Optimizer could not load (offline?) — showing the default case'); console.warn(e); });
+</script>
+</body>
+</html>

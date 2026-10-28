@@ -1,0 +1,11 @@
+id,name,lat,lon,colocated_supplier,rent_factor
+K1,DSNY Fresh Kills Composting Facility,40.58586,-74.19319,S1,1.5
+K2,Garden City Compost,40.72178,-73.64408,S2,1.5
+K3,Omni Recycling of Babylon,40.7308,-73.39634,S3,1.5
+K4,Carlsoncorp Kings Park,40.87867,-73.28367,S4,1.5
+K5,Long Island Compost Farm #36,40.85226,-72.83329,S5,1.5
+K6,Wagner Lumber Co. (Owego),42.1299,-76.18422,S6,1.0
+K7,Gutchess Lumber Co. (Cortland),42.58205,-76.2139,S7,1.0
+K8,Gutchess Freedom,42.46678,-78.38494,S8,1.0
+K9,Ward Lumber Co. (Jay),44.36617,-73.72421,S9,1.0
+K10,Peter C. Herman Inc. (Marion),43.14956,-77.12458,S10,1.0

@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>Biochar Site Finder - NY Investor Demo</title>
+        <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.14.0/dist/maplibre-gl.css" />
+    <script src='https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@~9.3.*/dist/index.js'></script>
+    <link rel="stylesheet" href=https://cdn.jsdelivr.net/npm/@deck.gl/widgets@~9.3.*/dist/stylesheet.css />
+    <style>
+    body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#deck-container {
+  width: 100vw;
+  height: 100vh;
+}
+
+#deck-container canvas {
+  z-index: 1;
+  background: none;
+}
+
+#deck-container .error_text {
+  color: red;
+  background: none;
+  position: absolute;
+  z-index: 100;
+}
+    </style>
+  </head>
+  <body>
+    <div id="deck-container">
+    </div>
+  
+<style>
+ .tt{font:13px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;background:rgba(10,14,24,.94);color:#e8eef8;padding:12px 14px;
+     border:1px solid rgba(255,210,77,.55);border-radius:10px;box-shadow:0 0 22px rgba(255,190,40,.35);min-width:250px}
+ .tt hr{border:0;border-top:1px solid rgba(255,255,255,.15);margin:6px 0}
+ .panel{position:fixed;z-index:9;font:13px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;color:#dfe8f5;background:rgba(10,14,24,.78);
+     backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 16px}
+ #hdr{top:16px;left:16px;max-width:360px} #hdr h1{margin:0 0 2px;font-size:20px;color:#fff;letter-spacing:.3px}
+ #hdr .sub{color:#9fb0c8;font-size:12px;margin-bottom:10px}
+ .kpis{display:flex;gap:16px} .kpi b{display:block;font-size:19px;color:#ffd24d} .kpi span{font-size:11px;color:#9fb0c8;text-transform:uppercase;letter-spacing:.6px}
+ #leg{bottom:16px;left:16px} #leg div{margin:3px 0;display:flex;align-items:center;gap:9px}
+ .sw{width:26px;height:4px;border-radius:2px;display:inline-block} .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+ #note{bottom:16px;right:16px;max-width:300px;font-size:11px;color:#9fb0c8}
+</style>
+<div class="panel" id="hdr"><h1>Biochar Site Finder</h1><div class="sub">New York State &middot; 30-node optimization prototype &middot; 15-yr NPV @ 10%</div>
+ <div class="kpis"><div class="kpi"><b>$108.7M</b><span>Portfolio NPV</span></div>
+ <div class="kpi"><b>4</b><span>Sites opened</span></div>
+ <div class="kpi"><b>21,750</b><span>t biochar / yr</span></div>
+ <div class="kpi"><b>30,451</b><span>credits / yr</span></div></div></div>
+<div class="panel" id="leg">
+ <div><span class="sw" style="background:#ffd75a;height:14px;width:10px"></span>Selected site &mdash; tower height = NPV</div>
+ <div><span class="sw" style="background:linear-gradient(90deg,#3cff78,#ffbe28)"></span>Wood feedstock &rarr; site</div>
+ <div><span class="sw" style="background:linear-gradient(90deg,#00ffff,#286eff)"></span>Biochar &rarr; buyer</div>
+ <div><span class="dot" style="background:#ffaa28"></span>Wood supplier / candidate site</div>
+ <div><span class="dot" style="background:#3cbeff"></span>Biochar buyer</div></div>
+<div class="panel" id="note">Locations: real NYS DEC facility data. Biochar $500/t and carbon credit $177 per credit. CapEx, opex, supply and tipping fees are assumptions for the prototype. Hover a tower for details; drag to rotate.</div>
+</body>
+  <script>
+    const container = document.getElementById('deck-container');
+    const jsonInput = {
+  "initialViewState": {
+    "bearing": -12,
+    "latitude": 42.3,
+    "longitude": -75.6,
+    "pitch": 45,
+    "zoom": 6.2
+  },
+  "layers": [
+    {
+      "@@type": "ScatterplotLayer",
+      "data": [
+        {
+          "id": "S1",
+          "lat": 40.58586,
+          "lon": -74.19319,
+          "moisture": 0.45,
+          "name": "DSNY Fresh Kills Composting Facility",
+          "price_per_ton": -35,
+          "region": "Downstate",
+          "selected": true,
+          "source": "NYS DEC SWM Facilities",
+          "supply_tpy": 60000,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Wood supplier (Downstate)<br>Supply: 60,000 wet t/yr<br>Moisture: 45%</div>"
+        },
+        {
+          "id": "S2",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "moisture": 0.45,
+          "name": "Garden City Compost",
+          "price_per_ton": -35,
+          "region": "Downstate",
+          "selected": true,
+          "source": "NYS DEC SWM Facilities",
+          "supply_tpy": 25000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Wood supplier (Downstate)<br>Supply: 25,000 wet t/yr<br>Moisture: 45%</div>"
+        },
+        {
+          "id": "S3",
+          "lat": 40.7308,
+          "lon": -73.39634,
+          "moisture": 0.4,
+          "name": "Omni Recycling of Babylon",
+          "price_per_ton": -35,
+          "region": "Downstate",
+          "selected": true,
+          "source": "NYS DEC SWM Facilities",
+          "supply_tpy": 35000,
+          "tooltip": "<div class='tt'><b>Omni Recycling of Babylon</b><hr>Wood supplier (Downstate)<br>Supply: 35,000 wet t/yr<br>Moisture: 40%</div>"
+        },
+        {
+          "id": "S4",
+          "lat": 40.87867,
+          "lon": -73.28367,
+          "moisture": 0.4,
+          "name": "Carlsoncorp Kings Park",
+          "price_per_ton": -35,
+          "region": "Downstate",
+          "selected": false,
+          "source": "NYS DEC SWM Facilities",
+          "supply_tpy": 30000,
+          "tooltip": "<div class='tt'><b>Carlsoncorp Kings Park</b><hr>Wood supplier (Downstate)<br>Supply: 30,000 wet t/yr<br>Moisture: 40%</div>"
+        },
+        {
+          "id": "S5",
+          "lat": 40.85226,
+          "lon": -72.83329,
+          "moisture": 0.45,
+          "name": "Long Island Compost Farm #36",
+          "price_per_ton": -35,
+          "region": "Downstate",
+          "selected": true,
+          "source": "NYS DEC SWM Facilities",
+          "supply_tpy": 25000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Wood supplier (Downstate)<br>Supply: 25,000 wet t/yr<br>Moisture: 45%</div>"
+        },
+        {
+          "id": "S6",
+          "lat": 42.1299,
+          "lon": -76.18422,
+          "moisture": 0.5,
+          "name": "Wagner Lumber Co. (Owego)",
+          "price_per_ton": 10,
+          "region": "Upstate",
+          "selected": false,
+          "source": "DEC Wood Directory 2017",
+          "supply_tpy": 18000,
+          "tooltip": "<div class='tt'><b>Wagner Lumber Co. (Owego)</b><hr>Wood supplier (Upstate)<br>Supply: 18,000 wet t/yr<br>Moisture: 50%</div>"
+        },
+        {
+          "id": "S7",
+          "lat": 42.58205,
+          "lon": -76.2139,
+          "moisture": 0.5,
+          "name": "Gutchess Lumber Co. (Cortland)",
+          "price_per_ton": 10,
+          "region": "Upstate",
+          "selected": false,
+          "source": "DEC Wood Directory 2017",
+          "supply_tpy": 18000,
+          "tooltip": "<div class='tt'><b>Gutchess Lumber Co. (Cortland)</b><hr>Wood supplier (Upstate)<br>Supply: 18,000 wet t/yr<br>Moisture: 50%</div>"
+        },
+        {
+          "id": "S8",
+          "lat": 42.46678,
+          "lon": -78.38494,
+          "moisture": 0.5,
+          "name": "Gutchess Freedom",
+          "price_per_ton": 10,
+          "region": "Upstate",
+          "selected": false,
+          "source": "DEC Wood Directory 2017",
+          "supply_tpy": 18000,
+          "tooltip": "<div class='tt'><b>Gutchess Freedom</b><hr>Wood supplier (Upstate)<br>Supply: 18,000 wet t/yr<br>Moisture: 50%</div>"
+        },
+        {
+          "id": "S9",
+          "lat": 44.36617,
+          "lon": -73.72421,
+          "moisture": 0.5,
+          "name": "Ward Lumber Co. (Jay)",
+          "price_per_ton": 10,
+          "region": "Upstate",
+          "selected": false,
+          "source": "DEC Wood Directory 2017",
+          "supply_tpy": 13500,
+          "tooltip": "<div class='tt'><b>Ward Lumber Co. (Jay)</b><hr>Wood supplier (Upstate)<br>Supply: 13,500 wet t/yr<br>Moisture: 50%</div>"
+        },
+        {
+          "id": "S10",
+          "lat": 43.14956,
+          "lon": -77.12458,
+          "moisture": 0.5,
+          "name": "Peter C. Herman Inc. (Marion)",
+          "price_per_ton": 10,
+          "region": "Upstate",
+          "selected": false,
+          "source": "DEC Wood Directory 2017",
+          "supply_tpy": 11700,
+          "tooltip": "<div class='tt'><b>Peter C. Herman Inc. (Marion)</b><hr>Wood supplier (Upstate)<br>Supply: 11,700 wet t/yr<br>Moisture: 50%</div>"
+        }
+      ],
+      "getFillColor": "@@=selected ? [255,190,60,255] : [255,170,40,150]",
+      "getLineColor": [
+        255,
+        200,
+        90,
+        220
+      ],
+      "getPosition": "@@=[lon, lat]",
+      "getRadius": 5500,
+      "id": "c34300f4-d721-41ce-b119-de0958a8c3f1",
+      "lineWidthMinPixels": 1,
+      "pickable": true,
+      "radiusMaxPixels": 14,
+      "radiusMinPixels": 4,
+      "stroked": true
+    },
+    {
+      "@@type": "ScatterplotLayer",
+      "data": [
+        {
+          "demand_tpy": 3750.0,
+          "id": "C1",
+          "lat": 40.80158,
+          "lon": -72.92632,
+          "name": "Long Island Compost - Grucci Lane (Yaphank)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Long Island Compost - Grucci Lane (Yaphank)</b><hr>Biochar buyer: Compost/Soil<br>Demand: 3,750.0 t/yr @ $500/t</div>",
+          "type": "Compost/Soil"
+        },
+        {
+          "demand_tpy": 3000.0,
+          "id": "C2",
+          "lat": 43.0541,
+          "lon": -78.72069,
+          "name": "C.J. Krantz Organic Recycling Center (Amherst)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>C.J. Krantz Organic Recycling Center (Amherst)</b><hr>Biochar buyer: Compost/Soil<br>Demand: 3,000.0 t/yr @ $500/t</div>",
+          "type": "Compost/Soil"
+        },
+        {
+          "demand_tpy": 2250.0,
+          "id": "C3",
+          "lat": 43.03793,
+          "lon": -77.2564,
+          "name": "Vermi-Green LLC (Palmyra)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Vermi-Green LLC (Palmyra)</b><hr>Biochar buyer: Compost/Soil<br>Demand: 2,250.0 t/yr @ $500/t</div>",
+          "type": "Compost/Soil"
+        },
+        {
+          "demand_tpy": 2250.0,
+          "id": "C4",
+          "lat": 41.70516,
+          "lon": -74.06534,
+          "name": "Hurds Farm Compost (Clintondale)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Hurds Farm Compost (Clintondale)</b><hr>Biochar buyer: Compost/Soil<br>Demand: 2,250.0 t/yr @ $500/t</div>",
+          "type": "Compost/Soil"
+        },
+        {
+          "demand_tpy": 1500.0,
+          "id": "C5",
+          "lat": 41.29994,
+          "lon": -73.88404,
+          "name": "Montrose Water Treatment Plant (Westchester)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Montrose Water Treatment Plant (Westchester)</b><hr>Biochar buyer: Water Filtration<br>Demand: 1,500.0 t/yr @ $500/t</div>",
+          "type": "Water Filtration"
+        },
+        {
+          "demand_tpy": 1800.0,
+          "id": "C6",
+          "lat": 42.94556,
+          "lon": -76.43073,
+          "name": "Syracuse Water Treatment Plant (Skaneateles Lake)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Syracuse Water Treatment Plant (Skaneateles Lake)</b><hr>Biochar buyer: Water Filtration<br>Demand: 1,800.0 t/yr @ $500/t</div>",
+          "type": "Water Filtration"
+        },
+        {
+          "demand_tpy": 1500.0,
+          "id": "C7",
+          "lat": 43.07615,
+          "lon": -78.99844,
+          "name": "Michael C. O'Laughlin Water Plant (Niagara Falls)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Michael C. O'Laughlin Water Plant (Niagara Falls)</b><hr>Biochar buyer: Water Filtration<br>Demand: 1,500.0 t/yr @ $500/t</div>",
+          "type": "Water Filtration"
+        },
+        {
+          "demand_tpy": 2700.0,
+          "id": "C8",
+          "lat": 41.49622,
+          "lon": -74.2428,
+          "name": "Home Depot Distribution Center (Montgomery)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Home Depot Distribution Center (Montgomery)</b><hr>Biochar buyer: Retail Garden Hub<br>Demand: 2,700.0 t/yr @ $500/t</div>",
+          "type": "Retail Garden Hub"
+        },
+        {
+          "demand_tpy": 1200.0,
+          "id": "C9",
+          "lat": 40.76322,
+          "lon": -73.59735,
+          "name": "Hicks Nurseries (Westbury)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Hicks Nurseries (Westbury)</b><hr>Biochar buyer: Retail Garden Hub<br>Demand: 1,200.0 t/yr @ $500/t</div>",
+          "type": "Retail Garden Hub"
+        },
+        {
+          "demand_tpy": 1800.0,
+          "id": "C10",
+          "lat": 43.20214,
+          "lon": -77.62816,
+          "name": "Eastman Business Park / Li-Cycle (Rochester)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Eastman Business Park / Li-Cycle (Rochester)</b><hr>Biochar buyer: Battery/Industrial<br>Demand: 1,800.0 t/yr @ $500/t</div>",
+          "type": "Battery/Industrial"
+        }
+      ],
+      "getFillColor": [
+        60,
+        190,
+        255,
+        230
+      ],
+      "getLineColor": [
+        160,
+        230,
+        255,
+        255
+      ],
+      "getPosition": "@@=[lon, lat]",
+      "getRadius": 5500,
+      "id": "11415246-b55a-4978-b038-b52cb6ce56b9",
+      "lineWidthMinPixels": 1,
+      "pickable": true,
+      "radiusMaxPixels": 12,
+      "radiusMinPixels": 4,
+      "stroked": true
+    },
+    {
+      "@@type": "ArcLayer",
+      "data": [
+        {
+          "i": 2,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 16,
+          "s_lat": 40.7308,
+          "s_lon": -73.39634,
+          "site": "Garden City Compost",
+          "supplier": "Omni Recycling of Babylon",
+          "tooltip": "<div class='tt'><b>Wood feedstock</b><hr>Omni Recycling of Babylon &rarr; Garden City Compost<br>5,000 wet t/yr &middot; 16 mi</div>",
+          "w": 3.666666666666667,
+          "wet_tons": 5000
+        },
+        {
+          "i": 3,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 27,
+          "s_lat": 40.87867,
+          "s_lon": -73.28367,
+          "site": "Garden City Compost",
+          "supplier": "Carlsoncorp Kings Park",
+          "tooltip": "<div class='tt'><b>Wood feedstock</b><hr>Carlsoncorp Kings Park &rarr; Garden City Compost<br>1,818 wet t/yr &middot; 27 mi</div>",
+          "w": 2.606,
+          "wet_tons": 1818
+        },
+        {
+          "i": 3,
+          "k": 4,
+          "k_lat": 40.85226,
+          "k_lon": -72.83329,
+          "miles": 30,
+          "s_lat": 40.87867,
+          "s_lon": -73.28367,
+          "site": "Long Island Compost Farm #36",
+          "supplier": "Carlsoncorp Kings Park",
+          "tooltip": "<div class='tt'><b>Wood feedstock</b><hr>Carlsoncorp Kings Park &rarr; Long Island Compost Farm #36<br>5,000 wet t/yr &middot; 30 mi</div>",
+          "w": 3.666666666666667,
+          "wet_tons": 5000
+        }
+      ],
+      "getHeight": 0.6,
+      "getSourceColor": [
+        60,
+        255,
+        120,
+        230
+      ],
+      "getSourcePosition": "@@=[s_lon, s_lat]",
+      "getTargetColor": [
+        255,
+        190,
+        40,
+        230
+      ],
+      "getTargetPosition": "@@=[k_lon, k_lat]",
+      "getWidth": "@@=w",
+      "greatCircle": false,
+      "id": "f8a274a7-57b8-4c18-a0f6-1a5608468e71",
+      "pickable": true
+    },
+    {
+      "@@type": "ArcLayer",
+      "data": [
+        {
+          "biochar_tons": 3000,
+          "c_lat": 43.0541,
+          "c_lon": -78.72069,
+          "customer": "C.J. Krantz Organic Recycling Center (Amherst)",
+          "j": 1,
+          "k": 0,
+          "k_lat": 40.58586,
+          "k_lon": -74.19319,
+          "miles": 376,
+          "site": "DSNY Fresh Kills Composting Facility",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; C.J. Krantz Organic Recycling Center (Amherst)<br>3,000 t/yr &middot; 376 mi</div>",
+          "w": 7.0
+        },
+        {
+          "biochar_tons": 2250,
+          "c_lat": 43.03793,
+          "c_lon": -77.2564,
+          "customer": "Vermi-Green LLC (Palmyra)",
+          "j": 2,
+          "k": 0,
+          "k_lat": 40.58586,
+          "k_lon": -74.19319,
+          "miles": 298,
+          "site": "DSNY Fresh Kills Composting Facility",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; Vermi-Green LLC (Palmyra)<br>2,250 t/yr &middot; 298 mi</div>",
+          "w": 5.75
+        },
+        {
+          "biochar_tons": 1800,
+          "c_lat": 42.94556,
+          "c_lon": -76.43073,
+          "customer": "Syracuse Water Treatment Plant (Skaneateles Lake)",
+          "j": 5,
+          "k": 0,
+          "k_lat": 40.58586,
+          "k_lon": -74.19319,
+          "miles": 246,
+          "site": "DSNY Fresh Kills Composting Facility",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; Syracuse Water Treatment Plant (Skaneateles Lake)<br>1,800 t/yr &middot; 246 mi</div>",
+          "w": 5.0
+        },
+        {
+          "biochar_tons": 513,
+          "c_lat": 43.07615,
+          "c_lon": -78.99844,
+          "customer": "Michael C. O'Laughlin Water Plant (Niagara Falls)",
+          "j": 6,
+          "k": 0,
+          "k_lat": 40.58586,
+          "k_lon": -74.19319,
+          "miles": 388,
+          "site": "DSNY Fresh Kills Composting Facility",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; Michael C. O'Laughlin Water Plant (Niagara Falls)<br>513 t/yr &middot; 388 mi</div>",
+          "w": 2.855
+        },
+        {
+          "biochar_tons": 131,
+          "c_lat": 43.07615,
+          "c_lon": -78.99844,
+          "customer": "Michael C. O'Laughlin Water Plant (Niagara Falls)",
+          "j": 6,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 409,
+          "site": "Garden City Compost",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Michael C. O'Laughlin Water Plant (Niagara Falls)<br>131 t/yr &middot; 409 mi</div>",
+          "w": 2.2183333333333333
+        },
+        {
+          "biochar_tons": 2700,
+          "c_lat": 41.49622,
+          "c_lon": -74.2428,
+          "customer": "Home Depot Distribution Center (Montgomery)",
+          "j": 7,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 84,
+          "site": "Garden City Compost",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Home Depot Distribution Center (Montgomery)<br>2,700 t/yr &middot; 84 mi</div>",
+          "w": 6.5
+        },
+        {
+          "biochar_tons": 1800,
+          "c_lat": 43.20214,
+          "c_lon": -77.62816,
+          "customer": "Eastman Business Park / Li-Cycle (Rochester)",
+          "j": 9,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 342,
+          "site": "Garden City Compost",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Eastman Business Park / Li-Cycle (Rochester)<br>1,800 t/yr &middot; 342 mi</div>",
+          "w": 5.0
+        },
+        {
+          "biochar_tons": 1394,
+          "c_lat": 41.70516,
+          "c_lon": -74.06534,
+          "customer": "Hurds Farm Compost (Clintondale)",
+          "j": 3,
+          "k": 2,
+          "k_lat": 40.7308,
+          "k_lon": -73.39634,
+          "miles": 112,
+          "site": "Omni Recycling of Babylon",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Omni Recycling of Babylon &rarr; Hurds Farm Compost (Clintondale)<br>1,394 t/yr &middot; 112 mi</div>",
+          "w": 4.323333333333333
+        },
+        {
+          "biochar_tons": 1500,
+          "c_lat": 41.29994,
+          "c_lon": -73.88404,
+          "customer": "Montrose Water Treatment Plant (Westchester)",
+          "j": 4,
+          "k": 2,
+          "k_lat": 40.7308,
+          "k_lon": -73.39634,
+          "miles": 71,
+          "site": "Omni Recycling of Babylon",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Omni Recycling of Babylon &rarr; Montrose Water Treatment Plant (Westchester)<br>1,500 t/yr &middot; 71 mi</div>",
+          "w": 4.5
+        },
+        {
+          "biochar_tons": 856,
+          "c_lat": 43.07615,
+          "c_lon": -78.99844,
+          "customer": "Michael C. O'Laughlin Water Plant (Niagara Falls)",
+          "j": 6,
+          "k": 2,
+          "k_lat": 40.7308,
+          "k_lon": -73.39634,
+          "miles": 425,
+          "site": "Omni Recycling of Babylon",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Omni Recycling of Babylon &rarr; Michael C. O'Laughlin Water Plant (Niagara Falls)<br>856 t/yr &middot; 425 mi</div>",
+          "w": 3.4266666666666667
+        },
+        {
+          "biochar_tons": 1200,
+          "c_lat": 40.76322,
+          "c_lon": -73.59735,
+          "customer": "Hicks Nurseries (Westbury)",
+          "j": 8,
+          "k": 2,
+          "k_lat": 40.7308,
+          "k_lon": -73.39634,
+          "miles": 15,
+          "site": "Omni Recycling of Babylon",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Omni Recycling of Babylon &rarr; Hicks Nurseries (Westbury)<br>1,200 t/yr &middot; 15 mi</div>",
+          "w": 4.0
+        },
+        {
+          "biochar_tons": 3750,
+          "c_lat": 40.80158,
+          "c_lon": -72.92632,
+          "customer": "Long Island Compost - Grucci Lane (Yaphank)",
+          "j": 0,
+          "k": 4,
+          "k_lat": 40.85226,
+          "k_lon": -72.83329,
+          "miles": 10,
+          "site": "Long Island Compost Farm #36",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Long Island Compost Farm #36 &rarr; Long Island Compost - Grucci Lane (Yaphank)<br>3,750 t/yr &middot; 10 mi</div>",
+          "w": 8.25
+        },
+        {
+          "biochar_tons": 856,
+          "c_lat": 41.70516,
+          "c_lon": -74.06534,
+          "customer": "Hurds Farm Compost (Clintondale)",
+          "j": 3,
+          "k": 4,
+          "k_lat": 40.85226,
+          "k_lon": -72.83329,
+          "miles": 140,
+          "site": "Long Island Compost Farm #36",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Long Island Compost Farm #36 &rarr; Hurds Farm Compost (Clintondale)<br>856 t/yr &middot; 140 mi</div>",
+          "w": 3.4266666666666667
+        }
+      ],
+      "getHeight": 0.5,
+      "getSourceColor": [
+        0,
+        255,
+        255,
+        240
+      ],
+      "getSourcePosition": "@@=[k_lon, k_lat]",
+      "getTargetColor": [
+        40,
+        110,
+        255,
+        240
+      ],
+      "getTargetPosition": "@@=[c_lon, c_lat]",
+      "getWidth": "@@=w",
+      "greatCircle": false,
+      "id": "68b89d1d-62c2-4be8-a052-96122aedd2c7",
+      "pickable": true
+    },
+    {
+      "@@type": "ColumnLayer",
+      "data": [
+        {
+          "annual_profit": 6169393,
+          "biochar_revenue": 3781250,
+          "biochar_tons_out": 7563,
+          "capacity_tpy": 50000,
+          "capex": 9500000,
+          "carbon_credit_revenue": 1873988,
+          "carbon_credits": 10588,
+          "dry_tons": 27500,
+          "elev": 150000.0,
+          "idx": 0,
+          "label": "$37.4M",
+          "lat": 40.58586,
+          "lon": -74.19319,
+          "machine_size": "Large",
+          "npv": 37424895,
+          "npv_fmt": "$37,424,895",
+          "opex_rent": 900000,
+          "pos": [
+            -74.19319,
+            40.58586,
+            152500.0
+          ],
+          "site": "DSNY Fresh Kills Composting Facility",
+          "site_id": "K1",
+          "tipping_fee_income": 1750000,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Large</b> (50,000 t/yr)<br>Tons processed / yr: <b>50,000 wet t</b> (27,500 dry t)<br>Biochar produced: <b>7,563 t/yr</b><br>Carbon credits generated: <b>10,588 /yr</b><br>Annual profit: <b>$6,169,393</b><br>Net present value: <b style='color:#ffd24d'>$37,424,895</b></div>",
+          "trucking_cost": 335844,
+          "wet_tons_in": 50000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3775764,
+          "biochar_revenue": 2315625,
+          "biochar_tons_out": 4631,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1147624,
+          "carbon_credits": 6484,
+          "dry_tons": 16841,
+          "elev": 91458.22854012015,
+          "idx": 1,
+          "label": "$22.8M",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "machine_size": "Medium",
+          "npv": 22818764,
+          "npv_fmt": "$22,818,764",
+          "opex_rent": 600000,
+          "pos": [
+            -73.64408,
+            40.72178,
+            93958.22854012015
+          ],
+          "site": "Garden City Compost",
+          "site_id": "K2",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,841 dry t)<br>Biochar produced: <b>4,631 t/yr</b><br>Carbon credits generated: <b>6,484 /yr</b><br>Annual profit: <b>$3,775,764</b><br>Net present value: <b style='color:#ffd24d'>$22,818,764</b></div>",
+          "trucking_cost": 137484,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 4062910,
+          "biochar_revenue": 2475000,
+          "biochar_tons_out": 4950,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1226610,
+          "carbon_credits": 6930,
+          "dry_tons": 18000,
+          "elev": 100211.98055465487,
+          "idx": 2,
+          "label": "$25.0M",
+          "lat": 40.7308,
+          "lon": -73.39634,
+          "machine_size": "Medium",
+          "npv": 25002819,
+          "npv_fmt": "$25,002,819",
+          "opex_rent": 600000,
+          "pos": [
+            -73.39634,
+            40.7308,
+            102711.98055465487
+          ],
+          "site": "Omni Recycling of Babylon",
+          "site_id": "K3",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Omni Recycling of Babylon</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (18,000 dry t)<br>Biochar produced: <b>4,950 t/yr</b><br>Carbon credits generated: <b>6,930 /yr</b><br>Annual profit: <b>$4,062,910</b><br>Net present value: <b style='color:#ffd24d'>$25,002,819</b></div>",
+          "trucking_cost": 88700,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3856448,
+          "biochar_revenue": 2303125,
+          "biochar_tons_out": 4606,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1141429,
+          "carbon_credits": 6449,
+          "dry_tons": 16750,
+          "elev": 93917.9067837064,
+          "idx": 4,
+          "label": "$23.4M",
+          "lat": 40.85226,
+          "lon": -72.83329,
+          "machine_size": "Medium",
+          "npv": 23432452,
+          "npv_fmt": "$23,432,452",
+          "opex_rent": 600000,
+          "pos": [
+            -72.83329,
+            40.85226,
+            96417.9067837064
+          ],
+          "site": "Long Island Compost Farm #36",
+          "site_id": "K5",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,856,448</b><br>Net present value: <b style='color:#ffd24d'>$23,432,452</b></div>",
+          "trucking_cost": 38106,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        }
+      ],
+      "diskResolution": 24,
+      "elevationScale": 1,
+      "extruded": true,
+      "getElevation": "@@=elev",
+      "getFillColor": [
+        255,
+        190,
+        40,
+        45
+      ],
+      "getPosition": "@@=[lon, lat]",
+      "id": "5b61e16a-d7e5-4af3-97a1-b0ddfd04d57c",
+      "material": false,
+      "pickable": false,
+      "radius": 17000
+    },
+    {
+      "@@type": "ColumnLayer",
+      "autoHighlight": true,
+      "data": [
+        {
+          "annual_profit": 6169393,
+          "biochar_revenue": 3781250,
+          "biochar_tons_out": 7563,
+          "capacity_tpy": 50000,
+          "capex": 9500000,
+          "carbon_credit_revenue": 1873988,
+          "carbon_credits": 10588,
+          "dry_tons": 27500,
+          "elev": 150000.0,
+          "idx": 0,
+          "label": "$37.4M",
+          "lat": 40.58586,
+          "lon": -74.19319,
+          "machine_size": "Large",
+          "npv": 37424895,
+          "npv_fmt": "$37,424,895",
+          "opex_rent": 900000,
+          "pos": [
+            -74.19319,
+            40.58586,
+            152500.0
+          ],
+          "site": "DSNY Fresh Kills Composting Facility",
+          "site_id": "K1",
+          "tipping_fee_income": 1750000,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Large</b> (50,000 t/yr)<br>Tons processed / yr: <b>50,000 wet t</b> (27,500 dry t)<br>Biochar produced: <b>7,563 t/yr</b><br>Carbon credits generated: <b>10,588 /yr</b><br>Annual profit: <b>$6,169,393</b><br>Net present value: <b style='color:#ffd24d'>$37,424,895</b></div>",
+          "trucking_cost": 335844,
+          "wet_tons_in": 50000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3775764,
+          "biochar_revenue": 2315625,
+          "biochar_tons_out": 4631,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1147624,
+          "carbon_credits": 6484,
+          "dry_tons": 16841,
+          "elev": 91458.22854012015,
+          "idx": 1,
+          "label": "$22.8M",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "machine_size": "Medium",
+          "npv": 22818764,
+          "npv_fmt": "$22,818,764",
+          "opex_rent": 600000,
+          "pos": [
+            -73.64408,
+            40.72178,
+            93958.22854012015
+          ],
+          "site": "Garden City Compost",
+          "site_id": "K2",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,841 dry t)<br>Biochar produced: <b>4,631 t/yr</b><br>Carbon credits generated: <b>6,484 /yr</b><br>Annual profit: <b>$3,775,764</b><br>Net present value: <b style='color:#ffd24d'>$22,818,764</b></div>",
+          "trucking_cost": 137484,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 4062910,
+          "biochar_revenue": 2475000,
+          "biochar_tons_out": 4950,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1226610,
+          "carbon_credits": 6930,
+          "dry_tons": 18000,
+          "elev": 100211.98055465487,
+          "idx": 2,
+          "label": "$25.0M",
+          "lat": 40.7308,
+          "lon": -73.39634,
+          "machine_size": "Medium",
+          "npv": 25002819,
+          "npv_fmt": "$25,002,819",
+          "opex_rent": 600000,
+          "pos": [
+            -73.39634,
+            40.7308,
+            102711.98055465487
+          ],
+          "site": "Omni Recycling of Babylon",
+          "site_id": "K3",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Omni Recycling of Babylon</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (18,000 dry t)<br>Biochar produced: <b>4,950 t/yr</b><br>Carbon credits generated: <b>6,930 /yr</b><br>Annual profit: <b>$4,062,910</b><br>Net present value: <b style='color:#ffd24d'>$25,002,819</b></div>",
+          "trucking_cost": 88700,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3856448,
+          "biochar_revenue": 2303125,
+          "biochar_tons_out": 4606,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1141429,
+          "carbon_credits": 6449,
+          "dry_tons": 16750,
+          "elev": 93917.9067837064,
+          "idx": 4,
+          "label": "$23.4M",
+          "lat": 40.85226,
+          "lon": -72.83329,
+          "machine_size": "Medium",
+          "npv": 23432452,
+          "npv_fmt": "$23,432,452",
+          "opex_rent": 600000,
+          "pos": [
+            -72.83329,
+            40.85226,
+            96417.9067837064
+          ],
+          "site": "Long Island Compost Farm #36",
+          "site_id": "K5",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,856,448</b><br>Net present value: <b style='color:#ffd24d'>$23,432,452</b></div>",
+          "trucking_cost": 38106,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        }
+      ],
+      "diskResolution": 24,
+      "elevationScale": 1,
+      "extruded": true,
+      "getElevation": "@@=elev",
+      "getFillColor": [
+        255,
+        215,
+        90,
+        235
+      ],
+      "getPosition": "@@=[lon, lat]",
+      "highlightColor": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "id": "158c2b03-ffe1-41a8-80b2-abe691ded3e9",
+      "material": false,
+      "pickable": true,
+      "radius": 8500
+    },
+    {
+      "@@type": "TextLayer",
+      "billboard": true,
+      "data": [
+        {
+          "annual_profit": 6169393,
+          "biochar_revenue": 3781250,
+          "biochar_tons_out": 7563,
+          "capacity_tpy": 50000,
+          "capex": 9500000,
+          "carbon_credit_revenue": 1873988,
+          "carbon_credits": 10588,
+          "dry_tons": 27500,
+          "elev": 150000.0,
+          "idx": 0,
+          "label": "$37.4M",
+          "lat": 40.58586,
+          "lon": -74.19319,
+          "machine_size": "Large",
+          "npv": 37424895,
+          "npv_fmt": "$37,424,895",
+          "opex_rent": 900000,
+          "pos": [
+            -74.19319,
+            40.58586,
+            152500.0
+          ],
+          "site": "DSNY Fresh Kills Composting Facility",
+          "site_id": "K1",
+          "tipping_fee_income": 1750000,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Large</b> (50,000 t/yr)<br>Tons processed / yr: <b>50,000 wet t</b> (27,500 dry t)<br>Biochar produced: <b>7,563 t/yr</b><br>Carbon credits generated: <b>10,588 /yr</b><br>Annual profit: <b>$6,169,393</b><br>Net present value: <b style='color:#ffd24d'>$37,424,895</b></div>",
+          "trucking_cost": 335844,
+          "wet_tons_in": 50000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3775764,
+          "biochar_revenue": 2315625,
+          "biochar_tons_out": 4631,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1147624,
+          "carbon_credits": 6484,
+          "dry_tons": 16841,
+          "elev": 91458.22854012015,
+          "idx": 1,
+          "label": "$22.8M",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "machine_size": "Medium",
+          "npv": 22818764,
+          "npv_fmt": "$22,818,764",
+          "opex_rent": 600000,
+          "pos": [
+            -73.64408,
+            40.72178,
+            93958.22854012015
+          ],
+          "site": "Garden City Compost",
+          "site_id": "K2",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,841 dry t)<br>Biochar produced: <b>4,631 t/yr</b><br>Carbon credits generated: <b>6,484 /yr</b><br>Annual profit: <b>$3,775,764</b><br>Net present value: <b style='color:#ffd24d'>$22,818,764</b></div>",
+          "trucking_cost": 137484,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 4062910,
+          "biochar_revenue": 2475000,
+          "biochar_tons_out": 4950,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1226610,
+          "carbon_credits": 6930,
+          "dry_tons": 18000,
+          "elev": 100211.98055465487,
+          "idx": 2,
+          "label": "$25.0M",
+          "lat": 40.7308,
+          "lon": -73.39634,
+          "machine_size": "Medium",
+          "npv": 25002819,
+          "npv_fmt": "$25,002,819",
+          "opex_rent": 600000,
+          "pos": [
+            -73.39634,
+            40.7308,
+            102711.98055465487
+          ],
+          "site": "Omni Recycling of Babylon",
+          "site_id": "K3",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Omni Recycling of Babylon</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (18,000 dry t)<br>Biochar produced: <b>4,950 t/yr</b><br>Carbon credits generated: <b>6,930 /yr</b><br>Annual profit: <b>$4,062,910</b><br>Net present value: <b style='color:#ffd24d'>$25,002,819</b></div>",
+          "trucking_cost": 88700,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3856448,
+          "biochar_revenue": 2303125,
+          "biochar_tons_out": 4606,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1141429,
+          "carbon_credits": 6449,
+          "dry_tons": 16750,
+          "elev": 93917.9067837064,
+          "idx": 4,
+          "label": "$23.4M",
+          "lat": 40.85226,
+          "lon": -72.83329,
+          "machine_size": "Medium",
+          "npv": 23432452,
+          "npv_fmt": "$23,432,452",
+          "opex_rent": 600000,
+          "pos": [
+            -72.83329,
+            40.85226,
+            96417.9067837064
+          ],
+          "site": "Long Island Compost Farm #36",
+          "site_id": "K5",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,856,448</b><br>Net present value: <b style='color:#ffd24d'>$23,432,452</b></div>",
+          "trucking_cost": 38106,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        }
+      ],
+      "fontFamily": "@@='Segoe UI', Arial, sans-serif",
+      "fontWeight": 700,
+      "getAlignmentBaseline": "bottom",
+      "getColor": [
+        255,
+        235,
+        160,
+        255
+      ],
+      "getPosition": "@@=pos",
+      "getSize": 18,
+      "getText": "@@=label",
+      "id": "18637dc9-227b-4cee-984a-1f164eb17a0a"
+    }
+  ],
+  "mapProvider": "carto",
+  "mapStyle": "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+  "views": [
+    {
+      "@@type": "MapView",
+      "controller": true
+    }
+  ]
+};
+    const tooltip = {'html': '{tooltip}', 'style': {'backgroundColor': 'transparent', 'color': 'white'}};
+    const customLibraries = null;
+    const configuration = null;
+
+    const deckInstance = createDeck({
+                  container,
+      jsonInput,
+      tooltip,
+      customLibraries,
+      configuration,
+          });
+
+  </script>
+</html>

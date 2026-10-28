@@ -1,0 +1,11 @@
+id,name,type,lat,lon,demand_tpy,price_per_ton
+C1,Long Island Compost - Grucci Lane (Yaphank),Compost/Soil,40.80158,-72.92632,3750.0,500.0
+C2,C.J. Krantz Organic Recycling Center (Amherst),Compost/Soil,43.0541,-78.72069,3000.0,500.0
+C3,Vermi-Green LLC (Palmyra),Compost/Soil,43.03793,-77.2564,2250.0,500.0
+C4,Hurds Farm Compost (Clintondale),Compost/Soil,41.70516,-74.06534,2250.0,500.0
+C5,Montrose Water Treatment Plant (Westchester),Water Filtration,41.29994,-73.88404,1500.0,500.0
+C6,Syracuse Water Treatment Plant (Skaneateles Lake),Water Filtration,42.94556,-76.43073,1800.0,500.0
+C7,Michael C. O'Laughlin Water Plant (Niagara Falls),Water Filtration,43.07615,-78.99844,1500.0,500.0
+C8,Home Depot Distribution Center (Montgomery),Retail Garden Hub,41.49622,-74.2428,2700.0,500.0
+C9,Hicks Nurseries (Westbury),Retail Garden Hub,40.76322,-73.59735,1200.0,500.0
+C10,Eastman Business Park / Li-Cycle (Rochester),Battery/Industrial,43.20214,-77.62816,1800.0,500.0
