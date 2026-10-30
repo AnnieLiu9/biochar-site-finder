@@ -92,7 +92,7 @@ overlay = f"""
  .sw{{width:26px;height:4px;border-radius:2px;display:inline-block}} .dot{{width:11px;height:11px;border-radius:50%;display:inline-block}}
  #note{{bottom:16px;right:16px;max-width:300px;font-size:11px;color:#9fb0c8}}
 </style>
-<div class="panel" id="hdr"><h1>Biochar Site Finder</h1><div class="sub">New York State &middot; 30-node optimization prototype &middot; {C_LIFE}-yr NPV @ {C_DISC}</div>
+<div class="panel" id="hdr"><h1>Biochar Site Finder</h1><div class="sub">New York State &middot; {len(sup) * 2 + len(cus)}-node optimization prototype &middot; {C_LIFE}-yr NPV @ {C_DISC}</div>
  <div class="kpis"><div class="kpi"><b>{usd(S['total_npv'])}</b><span>Portfolio NPV</span></div>
  <div class="kpi"><b>{len(sites)}</b><span>Sites opened</span></div>
  <div class="kpi"><b>{tot_t:,}</b><span>t biochar / yr</span></div>

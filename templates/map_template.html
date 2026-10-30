@@ -220,6 +220,8 @@ const GROUPS = [
   ]},
   {id: 'log', title: 'Logistics', open: false, items: [
     {id: 'truck', label: 'Trucking cost', unit: '$/loaded mile', min: 1.5, max: 5, step: 0.05, tag: 'R', note: 'ATRI 2025 operating cost $2.34/mi; DAT 2026 dry van ~$2.4, flatbed ~$3.0.'},
+    {id: 'max_wood_mi', label: 'Max wood haul distance', unit: 'road mi', min: 10, max: 500, step: 5, tag: 'A', note: 'Feedstock is not hauled farther than this. 40–50 miles is the usual rule of thumb for chips and residues. Set to 500 for no limit.'},
+    {id: 'max_char_mi', label: 'Max biochar delivery distance', unit: 'road mi', min: 10, max: 500, step: 5, tag: 'A', note: 'A plant only sells to buyers within this road distance. Set to 500 for no limit.'},
     {id: 'wood_payload', label: 'Wood payload', unit: 't/truck', min: 15, max: 32, step: 1, tag: 'A', note: 'Walking-floor trailer, wet chips.'},
     {id: 'char_payload', label: 'Biochar payload', unit: 't/truck', min: 10, max: 30, step: 1, tag: 'A', note: 'Biochar is low density.'},
   ]},
@@ -230,17 +232,17 @@ const GROUPS = [
     {id: 'min_util', label: 'Minimum utilisation of an open plant', unit: '%', min: 0, max: 80, step: 5, tag: 'A', note: 'A plant must run at least this share of capacity.'},
   ]},
   {id: 'mkt', title: 'Supply & demand', open: false, items: [
-    {id: 'demand_total', label: 'Biochar demand (10 buyers)', unit: 't/yr', min: 5000, max: 60000, step: 250, tag: 'A', note: 'No public New York market-size data found — the biggest unknown.'},
+    {id: 'demand_total', label: 'Biochar demand (20 buyers)', unit: 't/yr', min: 5000, max: 60000, step: 250, tag: 'A', note: 'No public New York market-size data found — the biggest unknown.'},
     {id: 'supply_scale', label: 'Feedstock availability', unit: '×', min: 0.3, max: 2, step: 0.05, tag: 'A', note: 'Supplier volumes are estimates; urban yard volumes are not public.'},
   ]},
 ];
 const ALL = GROUPS.flatMap(g => g.items);
 const PRESETS = [
   ['Default', {}],
-  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 14500}],
+  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 21000}],
   ['Market-aligned', {credit_price: 140, tco2_per_credit: 1}],
   ['No carbon credits', {credit_price: 0}],
-  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 29000}],
+  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 42000}],
 ];
 let P = {...DEF};
 let act = D.base;
@@ -409,19 +411,30 @@ function buildLP(Q) {
   const cps = Q.co2_per_t / Q.tco2_per_credit, creditPerT = cps * Q.credit_price;
   const tw = (i, k) => D.dSS[i][k] * Q.truck / Q.wood_payload, tc = (k, j) => D.dSC[k][j] * Q.truck / Q.char_payload;
   const obj = [], cons = [], bin = [];
-  for (let i = 0; i < nI; i++) for (let k = 0; k < nK; k++) obj.push(num(-A * (price[i] + tw(i, k) + Q.opex)) + ` x_${i}_${k}`);
-  for (let k = 0; k < nK; k++) for (let j = 0; j < nJ; j++) obj.push(num(A * (Q.biochar_price + creditPerT - tc(k, j))) + ` z_${k}_${j}`);
+  /* Haul-distance limits: links longer than the limit get no flow variable at all, which keeps every LP small. */
+  const okX = (i, k) => D.dSS[i][k] <= Q.max_wood_mi, okZ = (k, j) => D.dSC[k][j] <= Q.max_char_mi;
+  const Is = k => [...Array(nI).keys()].filter(i => okX(i, k)), Js = k => [...Array(nJ).keys()].filter(j => okZ(k, j));
+  const Ks_i = i => [...Array(nK).keys()].filter(k => okX(i, k)), Ks_j = j => [...Array(nK).keys()].filter(k => okZ(k, j));
+  for (let i = 0; i < nI; i++) for (let k = 0; k < nK; k++) if (okX(i, k)) obj.push(num(-A * (price[i] + tw(i, k) + Q.opex)) + ` x_${i}_${k}`);
+  for (let k = 0; k < nK; k++) for (let j = 0; j < nJ; j++) if (okZ(k, j)) obj.push(num(A * (Q.biochar_price + creditPerT - tc(k, j))) + ` z_${k}_${j}`);
   for (let k = 0; k < nK; k++) for (let s = 0; s < nS; s++) { obj.push(num(-A * rent(k, s) - capexS[s]) + ` y_${k}_${s}`); bin.push(`y_${k}_${s}`); }
   const xs = (i, k) => `x_${i}_${k}`;
-  for (let i = 0; i < nI; i++) cons.push(` sup_${i}: ` + [...Array(nK).keys()].map(k => '+ ' + xs(i, k)).join(' ') + ` <= ${supply[i].toFixed(4)}`);
+  for (let i = 0; i < nI; i++) if (Ks_i(i).length) cons.push(` sup_${i}: ` + Ks_i(i).map(k => '+ ' + xs(i, k)).join(' ') + ` <= ${supply[i].toFixed(4)}`);
   for (let k = 0; k < nK; k++) {
-    const win = [...Array(nI).keys()].map(i => '+ ' + xs(i, k)).join(' ');
+    const win = Is(k).map(i => '+ ' + xs(i, k)).join(' ');
     cons.push(` cap_${k}: ${win} ` + SZ.map((s, si) => `- ${s.cap} y_${k}_${si}`).join(' ') + ' <= 0');
     cons.push(` min_${k}: ${win} ` + SZ.map((s, si) => `- ${(Q.min_util / 100 * s.cap).toFixed(4)} y_${k}_${si}`).join(' ') + ' >= 0');
-    cons.push(` bal_${k}: ` + [...Array(nJ).keys()].map(j => `+ z_${k}_${j}`).join(' ') + ' ' + [...Array(nI).keys()].map(i => `- ${conv[i].toFixed(8)} ${xs(i, k)}`).join(' ') + ' = 0');
+    if (Js(k).length || Is(k).length) cons.push(` bal_${k}: ` + Js(k).map(j => `+ z_${k}_${j}`).join(' ') + ' ' + Is(k).map(i => `- ${conv[i].toFixed(8)} ${xs(i, k)}`).join(' ') + ' = 0');
     cons.push(` one_${k}: ` + SZ.map((s, si) => `+ y_${k}_${si}`).join(' ') + ' <= 1');
   }
-  for (let j = 0; j < nJ; j++) cons.push(` dem_${j}: ` + [...Array(nK).keys()].map(k => `+ z_${k}_${j}`).join(' ') + ` <= ${demand[j].toFixed(4)}`);
+  for (let j = 0; j < nJ; j++) if (Ks_j(j).length) cons.push(` dem_${j}: ` + Ks_j(j).map(k => `+ z_${k}_${j}`).join(' ') + ` <= ${demand[j].toFixed(4)}`);
+  /* Valid inequalities (flow only leaves an open site, capped by the biggest machine): tighten the LP relaxation so branch-and-bound needs far fewer nodes. */
+  const maxCap = Math.max(...SZ.map(s => s.cap)), maxConv = Math.max(...conv);
+  for (let k = 0; k < nK; k++) {
+    const open = SZ.map((s, si) => `y_${k}_${si}`);
+    for (const j of Js(k)) { const u = Math.min(demand[j], maxCap * maxConv); cons.push(` zv_${k}_${j}: + z_${k}_${j} ` + open.map(y => `- ${u.toFixed(4)} ${y}`).join(' ') + ' <= 0'); }
+    for (const i of Is(k)) { const u = Math.min(supply[i], maxCap); cons.push(` xv_${i}_${k}: + ${xs(i, k)} ` + open.map(y => `- ${u.toFixed(4)} ${y}`).join(' ') + ' <= 0'); }
+  }
   cons.push(' budget: ' + [...Array(nK).keys()].flatMap(k => SZ.map((s, si) => `+ ${capexS[si].toFixed(2)} y_${k}_${si}`)).join(' ') + ` <= ${(Q.budget_m * 1e6).toFixed(2)}`);
   const wrapTerms = t => { const o = []; for (let i = 0; i < t.length; i += 6) o.push('  ' + t.slice(i, i + 6).join(' ')); return o.join('\n'); };
   const body = 'Maximize\n obj:\n' + wrapTerms(obj) + '\nSubject To\n' + cons.map(c => { const m = c.match(/^( *[A-Za-z_0-9]+:)(.*?)((?: <=| >=| =) .*)$/); const t = m[2].trim().split(/ (?=[+-] )/); return m[1] + '\n' + wrapTerms(t) + ' ' + m[3].trim(); }).join('\n') + '\n';
@@ -437,7 +450,7 @@ function nodeLP(M, fix) {
   return M.body + b + 'End\n';
 }
 const tick = () => new Promise(r => setTimeout(r, 0));
-async function branchAndBound(M, hooks, limitMs = 6000, gap = 1e-4) {
+async function branchAndBound(M, hooks, limitMs = 12000, gap = 1e-4) {
   const highs = await loadSolver(), t0 = performance.now();
   let best = null, bestObj = -Infinity, nodes = 0, rootBound = null, timedOut = false, stopped = false;
   const lp = fix => { nodes++; try { const r = highs.solve(nodeLP(M, fix)); return r.Status === 'Optimal' ? r : null; } catch (e) { return null; } };
@@ -545,14 +558,16 @@ function setStat(cls, txt) { const s = $('solveStat'); s.className = cls; s.quer
 let timer = null, seq = 0;
 function schedule() {
   if (!solverOK) return;
-  clearTimeout(timer); setStat('busy', 'Re-optimising…');
+  clearTimeout(timer);
+  if (same(P, DEF)) { seq++; act = D.base; index(); render(); setStat('ok', 'Live optimizer ready — default case (pre-solved optimum)'); return; }
+  setStat('busy', 'Re-optimising…');
   timer = setTimeout(async () => {
     const my = ++seq, t0 = performance.now(), stale = () => my !== seq;
     try {
       const res = await solveLive({...P}, {stale, onProgress: r => { if (stale()) return; act = r; index(); render(); setStat('busy', 'Refining to the proven optimum…'); }});
       if (!res || stale()) return;
       act = res; index(); render();
-      setStat('ok', `Live optimizer · optimum proven in ${Math.round(performance.now() - t0)} ms (${res.nodes} LP solves${res.timedOut ? ', time limit - best found' : ''})`);
+      setStat(res.timedOut ? 'busy' : 'ok', res.timedOut ? `Live optimizer · time limit reached after ${Math.round(performance.now() - t0)} ms — best answer found, may be slightly below the optimum` : `Live optimizer · optimum proven in ${Math.round(performance.now() - t0)} ms (${res.nodes} LP solves)`);
     } catch (e) { console.error(e); setStat('off', 'Optimizer error — see console'); }
   }, 140);
 }
@@ -568,7 +583,7 @@ function render() {
   $('kServed').textContent = `${fI(shown)} of ${fI(act.demand)} t  (${served.toFixed(0)}%)`; $('kBar').style.width = served + '%';
   const lim = served > 97 ? 'Customer demand is the binding constraint &mdash; more buyers, not more machines, is what unlocks upside.' : 'Capacity or budget is the binding constraint &mdash; unmet demand remains.';
   $('insight').innerHTML = n === 0 ? 'No site clears the investment hurdle under these assumptions.' : `<b>${n} site${n > 1 ? 's' : ''}</b> selected, <b>${fM(act.npv)}</b> NPV over ${P.life} yrs. ${lim}`;
-  $('subtitle').textContent = `New York State · 30-node optimization · ${P.life}-yr NPV @ ${(+P.discount).toFixed(1).replace(/\.0$/, '')}%`;
+  $('subtitle').textContent = `New York State · ${SUP.length + SITES.length + CUS.length}-node optimization · ${P.life}-yr NPV @ ${(+P.discount).toFixed(1).replace(/\.0$/, '')}%`;
   const sorted = [...act.sites].sort((a, b) => b.npv - a.npv), mx = sorted[0]?.npv || 1;
   $('rankNote').textContent = n + ' of ' + SITES.length;
   $('rank').innerHTML = n ? sorted.map(s => `<div class="row" data-k="${s.k}"><div class="fill" style="width:${Math.max(0, s.npv) / mx * 100}%"></div>

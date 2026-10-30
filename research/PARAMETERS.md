@@ -19,7 +19,7 @@ Confidence: **H** = published figure used directly, **M** = published range, our
 | Discount rate | 10% | 10% | WSU biochar TEA: real 10% (nominal 12.2%) | M |
 | Lifetime | 10 yr | **15 yr** | WSU TEA uses 20 yr for a power plant; 15 conservative for pyrolysis equipment | M |
 | Trucking | $2.50/mi | **$2.75/mi** | ATRI 2025 cost $2.336/mi; DAT 2026 dry van ~$2.39, flatbed ~$3.0 | H |
-| Customer demand | x1.5 of 14,500 t | x1.5 (unchanged) | **No data at all.** Biggest unknown; drives the number of sites | L |
+| Customer demand | x1.5 of 14,500 t | x1.5 of 20,967 t (20 buyers, 10 added near NYC) | **No data at all.** Biggest unknown; drives the number of sites. Added buyers' volumes are guesses | L |
 | Supplier supply volumes | assumed | unchanged | DEC lists mill capacity, not residue output; urban yard volumes not public | L |
 
 ## Sources

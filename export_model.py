@@ -30,7 +30,7 @@ def main():
         tip=float(-sup[down].price_per_ton.mean()), residue_price=float(sup[~down].price_per_ton.mean()),
         capex_per_t=C.CAPEX_PER_TPY / REF, capex_fixed_m=C.CAPEX_FIXED / 1e6, opex=C.VAR_OPEX_PER_WET_T,
         rent_fixed_k=C.RENT_FIXED / 1e3, rent_per_t=C.RENT_PER_TPY, rent_factor=float(sites.rent_factor[down.values].mean()),
-        truck=C.TRUCK_COST_PER_MILE, wood_payload=C.WOOD_PAYLOAD_T, char_payload=C.BIOCHAR_PAYLOAD_T,
+        truck=C.TRUCK_COST_PER_MILE, max_wood_mi=C.MAX_WOOD_MILES, max_char_mi=C.MAX_CHAR_MILES, wood_payload=C.WOOD_PAYLOAD_T, char_payload=C.BIOCHAR_PAYLOAD_T,
         discount=C.DISCOUNT_RATE * 100, life=C.LIFETIME_YEARS, budget_m=C.BUDGET / 1e6, min_util=C.MIN_UTILIZATION * 100,
         demand_total=float(cus.demand_tpy.sum()), supply_scale=1.0,
     )
