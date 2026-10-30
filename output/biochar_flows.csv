@@ -1,14 +1,5 @@
 k,j,site,customer,biochar_tons,miles,k_lat,k_lon,c_lat,c_lon
-0,1,DSNY Fresh Kills Composting Facility,C.J. Krantz Organic Recycling Center (Amherst),3000,376,40.58586,-74.19319,43.0541,-78.72069
-0,2,DSNY Fresh Kills Composting Facility,Vermi-Green LLC (Palmyra),2250,298,40.58586,-74.19319,43.03793,-77.2564
-0,5,DSNY Fresh Kills Composting Facility,Syracuse Water Treatment Plant (Skaneateles Lake),1800,246,40.58586,-74.19319,42.94556,-76.43073
-0,6,DSNY Fresh Kills Composting Facility,Michael C. O'Laughlin Water Plant (Niagara Falls),513,388,40.58586,-74.19319,43.07615,-78.99844
-1,6,Garden City Compost,Michael C. O'Laughlin Water Plant (Niagara Falls),131,409,40.72178,-73.64408,43.07615,-78.99844
-1,7,Garden City Compost,Home Depot Distribution Center (Montgomery),2700,84,40.72178,-73.64408,41.49622,-74.2428
-1,9,Garden City Compost,Eastman Business Park / Li-Cycle (Rochester),1800,342,40.72178,-73.64408,43.20214,-77.62816
-2,3,Omni Recycling of Babylon,Hurds Farm Compost (Clintondale),1394,112,40.7308,-73.39634,41.70516,-74.06534
-2,4,Omni Recycling of Babylon,Montrose Water Treatment Plant (Westchester),1500,71,40.7308,-73.39634,41.29994,-73.88404
-2,6,Omni Recycling of Babylon,Michael C. O'Laughlin Water Plant (Niagara Falls),856,425,40.7308,-73.39634,43.07615,-78.99844
-2,8,Omni Recycling of Babylon,Hicks Nurseries (Westbury),1200,15,40.7308,-73.39634,40.76322,-73.59735
-4,0,Long Island Compost Farm #36,Long Island Compost - Grucci Lane (Yaphank),3750,10,40.85226,-72.83329,40.80158,-72.92632
-4,3,Long Island Compost Farm #36,Hurds Farm Compost (Clintondale),856,140,40.85226,-72.83329,41.70516,-74.06534
+3,0,Carlsoncorp Kings Park,Long Island Compost - Grucci Lane (Yaphank),3750,24,40.87867,-73.28367,40.80158,-72.92632
+3,8,Carlsoncorp Kings Park,Hicks Nurseries (Westbury),1200,23,40.87867,-73.28367,40.76322,-73.59735
+6,5,Gutchess Lumber Co. (Cortland),Syracuse Water Treatment Plant (Skaneateles Lake),1800,30,42.58205,-76.2139,42.94556,-76.43073
+9,2,Peter C. Herman Inc. (Marion),Vermi-Green LLC (Palmyra),1609,14,43.14956,-77.12458,43.03793,-77.2564

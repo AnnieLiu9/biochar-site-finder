@@ -58,11 +58,14 @@ D_SS, D_SC = _D_SS * KM_TO_MI, _D_SC * KM_TO_MI  # miles
 RAW_DEMAND = cus.demand_tpy.values / C.DEMAND_SCALE   # demand before the DEMAND_SCALE assumption
 
 
-def solve(credit_price=None, tco2_per_credit=None, biochar_price=None, demand_scale=None, budget=None, verbose=False):
+def solve(credit_price=None, tco2_per_credit=None, biochar_price=None, demand_scale=None, budget=None,
+          max_wood_miles=None, max_char_miles=None, verbose=False):
     """Solve the siting MILP. Overrides default to config.py / customers.csv values."""
     credit_price = C.CREDIT_PRICE if credit_price is None else credit_price
     tco2_per_credit = C.TCO2_PER_CREDIT if tco2_per_credit is None else tco2_per_credit
     budget = C.BUDGET if budget is None else budget
+    max_wood = C.MAX_WOOD_MILES if max_wood_miles is None else max_wood_miles
+    max_char = C.MAX_CHAR_MILES if max_char_miles is None else max_char_miles
     price = np.full(len(cus), biochar_price, dtype=float) if biochar_price is not None else cus.price_per_ton.values.astype(float)
     demand = cus.demand_tpy.values.astype(float) if demand_scale is None else np.round(RAW_DEMAND * demand_scale / 50) * 50
 
@@ -78,6 +81,14 @@ def solve(credit_price=None, tco2_per_credit=None, biochar_price=None, demand_sc
     m.z = pyo.Var(K, J, domain=pyo.NonNegativeReals)   # biochar tons site -> customer
     SZ = list(C.MACHINE_SIZES)
     m.y = pyo.Var(K, SZ, domain=pyo.Binary)            # open site k with machine size s
+    for i in I:                                         # haul-distance limits: forbid flows on longer links
+        for k in K:
+            if D_SS[i, k] > max_wood:
+                m.x[i, k].fix(0)
+    for k in K:
+        for j in J:
+            if D_SC[k, j] > max_char:
+                m.z[k, j].fix(0)
     m.one = pyo.Constraint(K, rule=lambda m, k: sum(m.y[k, s] for s in SZ) <= 1)
     capex_s = {s: C.CAPEX_FIXED + C.CAPEX_PER_TPY * C.MACHINE_SIZES[s] for s in SZ}
     rent = lambda k, s: (C.RENT_FIXED + C.RENT_PER_TPY * C.MACHINE_SIZES[s]) * sites.rent_factor[k]

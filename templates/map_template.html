@@ -220,6 +220,8 @@ const GROUPS = [
   ]},
   {id: 'log', title: 'Logistics', open: false, items: [
     {id: 'truck', label: 'Trucking cost', unit: '$/loaded mile', min: 1.5, max: 5, step: 0.05, tag: 'R', note: 'ATRI 2025 operating cost $2.34/mi; DAT 2026 dry van ~$2.4, flatbed ~$3.0.'},
+    {id: 'max_wood_mi', label: 'Max wood haul distance', unit: 'road mi', min: 10, max: 500, step: 5, tag: 'A', note: 'Feedstock is not hauled farther than this. 40–50 miles is the usual rule of thumb for chips and residues. Set to 500 for no limit.'},
+    {id: 'max_char_mi', label: 'Max biochar delivery distance', unit: 'road mi', min: 10, max: 500, step: 5, tag: 'A', note: 'A plant only sells to buyers within this road distance. Set to 500 for no limit.'},
     {id: 'wood_payload', label: 'Wood payload', unit: 't/truck', min: 15, max: 32, step: 1, tag: 'A', note: 'Walking-floor trailer, wet chips.'},
     {id: 'char_payload', label: 'Biochar payload', unit: 't/truck', min: 10, max: 30, step: 1, tag: 'A', note: 'Biochar is low density.'},
   ]},
@@ -409,6 +411,9 @@ function buildLP(Q) {
   const cps = Q.co2_per_t / Q.tco2_per_credit, creditPerT = cps * Q.credit_price;
   const tw = (i, k) => D.dSS[i][k] * Q.truck / Q.wood_payload, tc = (k, j) => D.dSC[k][j] * Q.truck / Q.char_payload;
   const obj = [], cons = [], bin = [];
+  const zero = [];                                     // haul-distance limits: links longer than the limit are fixed at zero flow
+  for (let i = 0; i < nI; i++) for (let k = 0; k < nK; k++) if (D.dSS[i][k] > Q.max_wood_mi) zero.push(`x_${i}_${k}`);
+  for (let k = 0; k < nK; k++) for (let j = 0; j < nJ; j++) if (D.dSC[k][j] > Q.max_char_mi) zero.push(`z_${k}_${j}`);
   for (let i = 0; i < nI; i++) for (let k = 0; k < nK; k++) obj.push(num(-A * (price[i] + tw(i, k) + Q.opex)) + ` x_${i}_${k}`);
   for (let k = 0; k < nK; k++) for (let j = 0; j < nJ; j++) obj.push(num(A * (Q.biochar_price + creditPerT - tc(k, j))) + ` z_${k}_${j}`);
   for (let k = 0; k < nK; k++) for (let s = 0; s < nS; s++) { obj.push(num(-A * rent(k, s) - capexS[s]) + ` y_${k}_${s}`); bin.push(`y_${k}_${s}`); }
@@ -425,7 +430,7 @@ function buildLP(Q) {
   cons.push(' budget: ' + [...Array(nK).keys()].flatMap(k => SZ.map((s, si) => `+ ${capexS[si].toFixed(2)} y_${k}_${si}`)).join(' ') + ` <= ${(Q.budget_m * 1e6).toFixed(2)}`);
   const wrapTerms = t => { const o = []; for (let i = 0; i < t.length; i += 6) o.push('  ' + t.slice(i, i + 6).join(' ')); return o.join('\n'); };
   const body = 'Maximize\n obj:\n' + wrapTerms(obj) + '\nSubject To\n' + cons.map(c => { const m = c.match(/^( *[A-Za-z_0-9]+:)(.*?)((?: <=| >=| =) .*)$/); const t = m[2].trim().split(/ (?=[+-] )/); return m[1] + '\n' + wrapTerms(t) + ' ' + m[3].trim(); }).join('\n') + '\n';
-  return {body, ys: bin, A, capexS, rent, price, tw, tc, creditPerT, cps, demand, nI, nK, nJ, nS};
+  return {body, ys: bin, zero, A, capexS, rent, price, tw, tc, creditPerT, cps, demand, nI, nK, nJ, nS};
 }
 /* The MIP engine in this WebAssembly build crashes on this model, so branch-and-bound is done here:
    every node is a linear relaxation solved by HiGHS; branching is on the 0/1 'open site k with machine size s' variables.
@@ -434,6 +439,7 @@ function buildLP(Q) {
 function nodeLP(M, fix) {
   let b = 'Bounds\n';
   for (const y of M.ys) b += fix[y] === undefined ? ` 0 <= ${y} <= 1\n` : ` ${y} = ${fix[y]}\n`;
+  for (const v of M.zero) b += ` ${v} = 0\n`;
   return M.body + b + 'End\n';
 }
 const tick = () => new Promise(r => setTimeout(r, 0));

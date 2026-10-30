@@ -21,6 +21,8 @@ MIN_UTILIZATION = 0.40         # an opened machine must run at >= 40% of capacit
 # Trucking: ATRI 2025 operating cost $2.336/mile; DAT/Uber Freight dry van spot ~$2.25-2.44,
 # flatbed ~$2.5-3.1. Use $2.50 per loaded mile.
 TRUCK_COST_PER_MILE = 2.75    # ATRI 2025 op. cost $2.34/mi; DAT 2026 dry van ~$2.39, flatbed ~$3.0; walking floor in between
+MAX_WOOD_MILES = 50.0          # ASSUMPTION: feedstock is not hauled farther than this (road miles); industry rule of thumb is 40-50
+MAX_CHAR_MILES = 50.0          # ASSUMPTION: same limit for biochar deliveries to buyers
 WOOD_PAYLOAD_T = 25.0          # wet wood chips, walking-floor trailer
 BIOCHAR_PAYLOAD_T = 20.0       # biochar is low density
 

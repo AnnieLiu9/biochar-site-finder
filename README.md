@@ -34,6 +34,8 @@ python make_map_static.py           # -> investor_demo_3d_pydeck_static.html (pl
 
 - `optimize.py` - Pyomo model solved with HiGHS: binary choice of machine size per site, wood flows supplier -> site, biochar flows site -> buyer,
   supply / capacity / demand / budget / minimum-utilisation constraints, mass balance (moisture, yield). Objective: NPV of annual cash flow minus CapEx.
+  Haul-distance limits (`MAX_WOOD_MILES`, `MAX_CHAR_MILES` in `config.py`, 50 road miles by default; sliders in the page) forbid any wood or
+  biochar flow on a longer link - a rule of thumb that trucked biomass and biochar rarely pay beyond 40-50 miles. Set them to 500 to remove the limit.
 - `templates/map_template.html` - the demo page. It contains a JavaScript port of the same model. The WebAssembly HiGHS build (`highs@1.8.0`)
   solves linear programs; its integer solver crashes on this model, so branch-and-bound over the 0/1 site variables is implemented in the page
   (`branchAndBound`). It shows a near-optimal answer in about 0.1 s and refines to a proven optimum (typically 1-5 s, 6 s limit).
