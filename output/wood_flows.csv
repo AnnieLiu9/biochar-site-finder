@@ -1,4 +1,8 @@
 i,k,supplier,site,wet_tons,miles,s_lat,s_lon,k_lat,k_lon
-3,3,Carlsoncorp Kings Park,Carlsoncorp Kings Park,30000,0,40.87867,-73.28367,40.87867,-73.28367
+0,0,DSNY Fresh Kills Composting Facility,DSNY Fresh Kills Composting Facility,30000,0,40.58586,-74.19319,40.58586,-74.19319
+1,1,Garden City Compost,Garden City Compost,25000,0,40.72178,-73.64408,40.72178,-73.64408
+2,1,Omni Recycling of Babylon,Garden City Compost,5000,16,40.7308,-73.39634,40.72178,-73.64408
+3,4,Carlsoncorp Kings Park,Long Island Compost Farm #36,3182,30,40.87867,-73.28367,40.85226,-72.83329
+4,4,Long Island Compost Farm #36,Long Island Compost Farm #36,25000,0,40.85226,-72.83329,40.85226,-72.83329
 6,6,Gutchess Lumber Co. (Cortland),Gutchess Lumber Co. (Cortland),13091,0,42.58205,-76.2139,42.58205,-76.2139
 9,9,Peter C. Herman Inc. (Marion),Peter C. Herman Inc. (Marion),11700,0,43.14956,-77.12458,43.14956,-77.12458

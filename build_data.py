@@ -40,6 +40,18 @@ K = [
  ("Home Depot Distribution Center (Montgomery)", "Retail Garden Hub", 41.49622, -74.24280, 1800),
  ("Hicks Nurseries (Westbury)", "Retail Garden Hub", 40.76322, -73.59735, 800),
  ("Eastman Business Park / Li-Cycle (Rochester)", "Battery/Industrial", 43.20214, -77.62816, 1200),
+ # Added so plants near New York City have buyers within a 50-mile haul. Locations: NYS DEC SWM Facilities (composters) and
+ # OpenStreetMap Nominatim; demand is an ASSUMPTION (commercial composters 600-1,200 t, community farm / nursery sites 50-100 t).
+ ("Gedney Composting and Recycling (White Plains)", "Compost/Soil", 41.01378, -73.75722, 1200),
+ ("Organic Recycling Inc (Tappan)", "Compost/Soil", 41.03461, -73.94716, 800),
+ ("Sustainable Materials Management (Cortlandt Manor)", "Compost/Soil", 41.29802, -73.94663, 800),
+ ("Bistrian Materials / Calverton Materials (Calverton)", "Compost/Soil", 40.92778, -72.76002, 1200),
+ ("Sky Materials Corp. (Calverton)", "Compost/Soil", 40.92683, -72.77408, 800),
+ ("Rockland County Co-Composting Facility (Hillburn)", "Compost/Soil", 41.14754, -74.15334, 800),
+ ("Clear Flo Technologies (Lindenhurst)", "Compost/Soil", 40.71658, -73.39818, 600),
+ ("Queens Botanical Garden Farm & Compost Site (Flushing)", "Urban Agriculture", 40.75157, -73.82612, 100),
+ ("Brooklyn Grange (Brooklyn Navy Yard)", "Urban Agriculture", 40.69854, -73.97228, 50),
+ ("NYC Parks Greenbelt Native Plant Center (Staten Island)", "Municipal Nursery", 40.59646, -74.18139, 100),
 ]
 cus = pd.DataFrame(K, columns=["name","type","lat","lon","demand_tpy"])
 cus.insert(0, "id", [f"C{i+1}" for i in range(len(cus))])

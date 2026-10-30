@@ -49,6 +49,7 @@ parameter, its source and confidence level.
 
 ## Caveats
 
+- Biochar and wood hauls are limited to 50 road miles by default, so the result depends on which buyers lie within reach of each plant; the 10 buyers added near New York City have guessed volumes.
 - Supplier volumes, buyer demand, site rent and several cost items are assumptions; buyer demand is the largest unknown and drives how many plants make sense.
 - Carbon-credit defaults (credit price, tonnes of CO2 per credit) differ from published market figures; the page shows the market range next to each.
 - Prototype for discussion, not investment advice.

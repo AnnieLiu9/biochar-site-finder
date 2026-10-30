@@ -232,17 +232,17 @@ const GROUPS = [
     {id: 'min_util', label: 'Minimum utilisation of an open plant', unit: '%', min: 0, max: 80, step: 5, tag: 'A', note: 'A plant must run at least this share of capacity.'},
   ]},
   {id: 'mkt', title: 'Supply & demand', open: false, items: [
-    {id: 'demand_total', label: 'Biochar demand (10 buyers)', unit: 't/yr', min: 5000, max: 60000, step: 250, tag: 'A', note: 'No public New York market-size data found — the biggest unknown.'},
+    {id: 'demand_total', label: 'Biochar demand (20 buyers)', unit: 't/yr', min: 5000, max: 60000, step: 250, tag: 'A', note: 'No public New York market-size data found — the biggest unknown.'},
     {id: 'supply_scale', label: 'Feedstock availability', unit: '×', min: 0.3, max: 2, step: 0.05, tag: 'A', note: 'Supplier volumes are estimates; urban yard volumes are not public.'},
   ]},
 ];
 const ALL = GROUPS.flatMap(g => g.items);
 const PRESETS = [
   ['Default', {}],
-  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 14500}],
+  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 21000}],
   ['Market-aligned', {credit_price: 140, tco2_per_credit: 1}],
   ['No carbon credits', {credit_price: 0}],
-  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 29000}],
+  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 42000}],
 ];
 let P = {...DEF};
 let act = D.base;
