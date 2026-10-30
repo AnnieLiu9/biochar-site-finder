@@ -38,8 +38,8 @@ python make_map_static.py           # -> investor_demo_3d_pydeck_static.html (pl
   biochar flow on a longer link - a rule of thumb that trucked biomass and biochar rarely pay beyond 40-50 miles. Set them to 500 to remove the limit.
 - `templates/map_template.html` - the demo page. It contains a JavaScript port of the same model. The WebAssembly HiGHS build (`highs@1.8.0`)
   solves linear programs; its integer solver crashes on this model, so branch-and-bound over the 0/1 site variables is implemented in the page
-  (`branchAndBound`). It shows a near-optimal answer in about 0.1 s and refines to a proven optimum (typically 1-5 s, 6 s limit).
-  Checked against `optimize.py` on 7 assumption sets: identical NPV, sites and CapEx. `investor_demo_3d.html?nosolver` disables the in-page optimizer.
+  (`branchAndBound`). It shows a near-optimal answer in about 0.1 s and refines to a proven optimum (typically 1-5 s, 12 s limit; links beyond the haul-distance limits get no variable, and flow-only-from-open-sites cuts keep the search short).
+  Checked against `optimize.py` on 8 assumption sets (including tight and no haul-distance limits): identical NPV, sites and biochar tonnes. `investor_demo_3d.html?nosolver` disables the in-page optimizer.
 - `export_model.py` / `make_map.py` bake the data and defaults into the page.
 
 ## Data
