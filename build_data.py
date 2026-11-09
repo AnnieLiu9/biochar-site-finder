@@ -17,15 +17,19 @@ S = [
  ("Gutchess Freedom", "Upstate", 42.46678, -78.38494, 18000, 0.50, 10, "DEC Wood Directory 2017"),
  ("Ward Lumber Co. (Jay)", "Upstate", 44.36617, -73.72421, 13500, 0.50, 10, "DEC Wood Directory 2017"),
  ("Peter C. Herman Inc. (Marion)", "Upstate", 43.14956, -77.12458, 11700, 0.50, 10, "DEC Wood Directory 2017"),
+ # Wood source only (not a candidate plant site: a plant inside the park is unlikely to be allowed). Location: OpenStreetMap
+ # Nominatim; volume and price are ASSUMPTIONS (tree work and chips from a 358-acre park; free wood, the buyer pays only trucking).
+ ("NYC Parks - Cunningham Park (Queens)", "Public park", 40.7352, -73.7675, 3000, 0.45, 0, "OSM Nominatim; volume assumed"),
 ]
 sup = pd.DataFrame(S, columns=["name","region","lat","lon","supply_tpy","moisture","price_per_ton","source"])
 sup.insert(0, "id", [f"S{i+1}" for i in range(len(sup))])
 sup[["id","name","region","lat","lon","supply_tpy","moisture","price_per_ton","source"]].to_csv("data/suppliers.csv", index=False)
 
-sites = sup[["id","name","lat","lon"]].copy()
+cand = sup[sup.region != "Public park"]                      # every other wood source doubles as a candidate plant site
+sites = cand[["id","name","lat","lon"]].copy().reset_index(drop=True)
 sites["id"] = [f"K{i+1}" for i in range(len(sites))]
-sites["colocated_supplier"] = sup["id"].values
-sites["rent_factor"] = sup["region"].map({"Downstate": 1.5, "Upstate": 1.0})  # ASSUMPTION: downstate land costs more
+sites["colocated_supplier"] = cand["id"].values
+sites["rent_factor"] = cand["region"].map({"Downstate": 1.5, "Upstate": 1.0}).values  # ASSUMPTION: downstate land costs more
 sites.to_csv("data/sites.csv", index=False)
 
 # name, type, lat, lon, demand t/yr, price
@@ -52,6 +56,12 @@ K = [
  ("Queens Botanical Garden Farm & Compost Site (Flushing)", "Urban Agriculture", 40.75157, -73.82612, 100),
  ("Brooklyn Grange (Brooklyn Navy Yard)", "Urban Agriculture", 40.69854, -73.97228, 50),
  ("NYC Parks Greenbelt Native Plant Center (Staten Island)", "Municipal Nursery", 40.59646, -74.18139, 100),
+ # Added near Cunningham Park (Queens). Locations: OpenStreetMap Nominatim; demand is an ASSUMPTION (farm / garden 100-300 t, retail 50 t).
+ ("Queens County Farm Museum (Floral Park)", "Urban Agriculture", 40.74818, -73.72189, 100),
+ ("New York Botanical Garden (Bronx)", "Botanical Garden", 40.86224, -73.87715, 200),
+ ("Brooklyn Botanic Garden (Brooklyn)", "Botanical Garden", 40.66766, -73.96363, 100),
+ ("Garden World (Bayside)", "Retail Garden Hub", 40.75354, -73.78218, 50),
+ ("Giordano Garden Shoppe (West Hempstead)", "Retail Garden Hub", 40.69955, -73.65114, 50),
 ]
 cus = pd.DataFrame(K, columns=["name","type","lat","lon","demand_tpy"])
 cus.insert(0, "id", [f"C{i+1}" for i in range(len(cus))])

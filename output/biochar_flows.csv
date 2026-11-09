@@ -1,16 +1,21 @@
 k,j,site,customer,biochar_tons,miles,k_lat,k_lon,c_lat,c_lon
-0,10,DSNY Fresh Kills Composting Facility,Gedney Composting and Recycling (White Plains),1738,48,40.58586,-74.19319,41.01378,-73.75722
+0,10,DSNY Fresh Kills Composting Facility,Gedney Composting and Recycling (White Plains),1288,48,40.58586,-74.19319,41.01378,-73.75722
 0,11,DSNY Fresh Kills Composting Facility,Organic Recycling Inc (Tappan),1200,44,40.58586,-74.19319,41.03461,-73.94716
 0,15,DSNY Fresh Kills Composting Facility,Rockland County Co-Composting Facility (Hillburn),1200,48,40.58586,-74.19319,41.14754,-74.15334
 0,17,DSNY Fresh Kills Composting Facility,Queens Botanical Garden Farm & Compost Site (Flushing),150,28,40.58586,-74.19319,40.75157,-73.82612
 0,18,DSNY Fresh Kills Composting Facility,Brooklyn Grange (Brooklyn Navy Yard),100,19,40.58586,-74.19319,40.69854,-73.97228
 0,19,DSNY Fresh Kills Composting Facility,NYC Parks Greenbelt Native Plant Center (Staten Island),150,1,40.58586,-74.19319,40.59646,-74.18139
-1,0,Garden City Compost,Long Island Compost - Grucci Lane (Yaphank),2444,42,40.72178,-73.64408,40.80158,-72.92632
-1,8,Garden City Compost,Hicks Nurseries (Westbury),1200,5,40.72178,-73.64408,40.76322,-73.59735
-1,10,Garden City Compost,Gedney Composting and Recycling (White Plains),62,31,40.72178,-73.64408,41.01378,-73.75722
-1,16,Garden City Compost,Clear Flo Technologies (Lindenhurst),900,15,40.72178,-73.64408,40.71658,-73.39818
-4,0,Long Island Compost Farm #36,Long Island Compost - Grucci Lane (Yaphank),1306,10,40.85226,-72.83329,40.80158,-72.92632
-4,13,Long Island Compost Farm #36,Bistrian Materials / Calverton Materials (Calverton),1800,9,40.85226,-72.83329,40.92778,-72.76002
-4,14,Long Island Compost Farm #36,Sky Materials Corp. (Calverton),1200,10,40.85226,-72.83329,40.92683,-72.77408
+0,21,DSNY Fresh Kills Composting Facility,New York Botanical Garden (Bronx),300,34,40.58586,-74.19319,40.86224,-73.87715
+0,22,DSNY Fresh Kills Composting Facility,Brooklyn Botanic Garden (Brooklyn),150,16,40.58586,-74.19319,40.66766,-73.96363
+2,0,Omni Recycling of Babylon,Long Island Compost - Grucci Lane (Yaphank),1800,27,40.7308,-73.39634,40.80158,-72.92632
+2,8,Omni Recycling of Babylon,Hicks Nurseries (Westbury),1200,15,40.7308,-73.39634,40.76322,-73.59735
+2,10,Omni Recycling of Babylon,Gedney Composting and Recycling (White Plains),512,47,40.7308,-73.39634,41.01378,-73.75722
+2,16,Omni Recycling of Babylon,Clear Flo Technologies (Lindenhurst),900,2,40.7308,-73.39634,40.71658,-73.39818
+2,20,Omni Recycling of Babylon,Queens County Farm Museum (Floral Park),150,21,40.7308,-73.39634,40.74818,-73.72189
+2,23,Omni Recycling of Babylon,Garden World (Bayside),100,27,40.7308,-73.39634,40.75354,-73.78218
+2,24,Omni Recycling of Babylon,Giordano Garden Shoppe (West Hempstead),100,16,40.7308,-73.39634,40.69955,-73.65114
+3,0,Carlsoncorp Kings Park,Long Island Compost - Grucci Lane (Yaphank),1950,24,40.87867,-73.28367,40.80158,-72.92632
+3,13,Carlsoncorp Kings Park,Bistrian Materials / Calverton Materials (Calverton),1800,29,40.87867,-73.28367,40.92778,-72.76002
+3,14,Carlsoncorp Kings Park,Sky Materials Corp. (Calverton),1200,28,40.87867,-73.28367,40.92683,-72.77408
 6,5,Gutchess Lumber Co. (Cortland),Syracuse Water Treatment Plant (Skaneateles Lake),1800,30,42.58205,-76.2139,42.94556,-76.43073
 9,2,Peter C. Herman Inc. (Marion),Vermi-Green LLC (Palmyra),1609,14,43.14956,-77.12458,43.03793,-77.2564
