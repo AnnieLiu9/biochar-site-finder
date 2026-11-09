@@ -51,11 +51,11 @@
  .sw{width:26px;height:4px;border-radius:2px;display:inline-block} .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
  #note{bottom:16px;right:16px;max-width:300px;font-size:11px;color:#9fb0c8}
 </style>
-<div class="panel" id="hdr"><h1>Biochar Site Finder</h1><div class="sub">New York State &middot; 40-node optimization prototype &middot; 15-yr NPV @ 10%</div>
- <div class="kpis"><div class="kpi"><b>$75.0M</b><span>Portfolio NPV</span></div>
+<div class="panel" id="hdr"><h1>Biochar Site Finder</h1><div class="sub">New York State &middot; 47-node optimization prototype &middot; 15-yr NPV @ 10%</div>
+ <div class="kpis"><div class="kpi"><b>$77.0M</b><span>Portfolio NPV</span></div>
  <div class="kpi"><b>5</b><span>Sites opened</span></div>
- <div class="kpi"><b>16,859</b><span>t biochar / yr</span></div>
- <div class="kpi"><b>23,603</b><span>credits / yr</span></div></div></div>
+ <div class="kpi"><b>17,159</b><span>t biochar / yr</span></div>
+ <div class="kpi"><b>24,023</b><span>credits / yr</span></div></div></div>
 <div class="panel" id="leg">
  <div><span class="sw" style="background:#ffd75a;height:14px;width:10px"></span>Selected site &mdash; tower height = NPV</div>
  <div><span class="sw" style="background:linear-gradient(90deg,#3cff78,#ffbe28)"></span>Wood feedstock &rarr; site</div>
@@ -207,6 +207,19 @@
           "source": "DEC Wood Directory 2017",
           "supply_tpy": 11700,
           "tooltip": "<div class='tt'><b>Peter C. Herman Inc. (Marion)</b><hr>Wood supplier (Upstate)<br>Supply: 11,700 wet t/yr<br>Moisture: 50%</div>"
+        },
+        {
+          "id": "S11",
+          "lat": 40.7352,
+          "lon": -73.7675,
+          "moisture": 0.45,
+          "name": "NYC Parks - Cunningham Park (Queens)",
+          "price_per_ton": -35,
+          "region": "Downstate",
+          "selected": false,
+          "source": "Cambium Carbon 2022; OSM Nominatim",
+          "supply_tpy": 6000,
+          "tooltip": "<div class='tt'><b>NYC Parks - Cunningham Park (Queens)</b><hr>Wood supplier (Downstate)<br>Supply: 6,000 wet t/yr<br>Moisture: 45%</div>"
         }
       ],
       "getFillColor": "@@=selected ? [255,190,60,255] : [255,170,40,150]",
@@ -218,7 +231,7 @@
       ],
       "getPosition": "@@=[lon, lat]",
       "getRadius": 5500,
-      "id": "9832baf0-4c16-40db-ad6e-0a6829824ca0",
+      "id": "d3e8f1dd-1552-485f-951e-df23c658ced8",
       "lineWidthMinPixels": 1,
       "pickable": true,
       "radiusMaxPixels": 14,
@@ -419,14 +432,64 @@
           "type": "Urban Agriculture"
         },
         {
-          "demand_tpy": 150.0,
+          "demand_tpy": 50.0,
           "id": "C20",
           "lat": 40.59646,
           "lon": -74.18139,
           "name": "NYC Parks Greenbelt Native Plant Center (Staten Island)",
           "price_per_ton": 500.0,
-          "tooltip": "<div class='tt'><b>NYC Parks Greenbelt Native Plant Center (Staten Island)</b><hr>Biochar buyer: Municipal Nursery<br>Demand: 150.0 t/yr @ $500/t</div>",
+          "tooltip": "<div class='tt'><b>NYC Parks Greenbelt Native Plant Center (Staten Island)</b><hr>Biochar buyer: Municipal Nursery<br>Demand: 50.0 t/yr @ $500/t</div>",
           "type": "Municipal Nursery"
+        },
+        {
+          "demand_tpy": 50.0,
+          "id": "C21",
+          "lat": 40.74818,
+          "lon": -73.72189,
+          "name": "Queens County Farm Museum (Floral Park)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Queens County Farm Museum (Floral Park)</b><hr>Biochar buyer: Urban Agriculture<br>Demand: 50.0 t/yr @ $500/t</div>",
+          "type": "Urban Agriculture"
+        },
+        {
+          "demand_tpy": 200.0,
+          "id": "C22",
+          "lat": 40.86224,
+          "lon": -73.87715,
+          "name": "New York Botanical Garden (Bronx)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>New York Botanical Garden (Bronx)</b><hr>Biochar buyer: Botanical Garden<br>Demand: 200.0 t/yr @ $500/t</div>",
+          "type": "Botanical Garden"
+        },
+        {
+          "demand_tpy": 50.0,
+          "id": "C23",
+          "lat": 40.66766,
+          "lon": -73.96363,
+          "name": "Brooklyn Botanic Garden (Brooklyn)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Brooklyn Botanic Garden (Brooklyn)</b><hr>Biochar buyer: Botanical Garden<br>Demand: 50.0 t/yr @ $500/t</div>",
+          "type": "Botanical Garden"
+        },
+        {
+          "demand_tpy": 50.0,
+          "id": "C24",
+          "lat": 40.75354,
+          "lon": -73.78218,
+          "name": "Garden World (Bayside)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Garden World (Bayside)</b><hr>Biochar buyer: Retail Garden Hub<br>Demand: 50.0 t/yr @ $500/t</div>",
+          "type": "Retail Garden Hub"
+        },
+        {
+          "demand_tpy": 50.0,
+          "id": "C25",
+          "lat": 40.69955,
+          "lon": -73.65114,
+          "name": "Giordano Garden Shoppe (West Hempstead)",
+          "price_per_ton": 500.0,
+          "tooltip": "<div class='tt'><b>Giordano Garden Shoppe (West Hempstead)</b><hr>Biochar buyer: Retail Garden Hub<br>Demand: 50.0 t/yr @ $500/t</div>",
+          "type": "Retail Garden Hub"
         }
       ],
       "getFillColor": [
@@ -443,7 +506,7 @@
       ],
       "getPosition": "@@=[lon, lat]",
       "getRadius": 5500,
-      "id": "fb70a994-bde9-4dfd-b3fa-dd2c6aa74f82",
+      "id": "6d31b910-73a0-443e-b9a9-27bcfb7385fa",
       "lineWidthMinPixels": 1,
       "pickable": true,
       "radiusMaxPixels": 12,
@@ -477,9 +540,9 @@
           "s_lon": -73.28367,
           "site": "Long Island Compost Farm #36",
           "supplier": "Carlsoncorp Kings Park",
-          "tooltip": "<div class='tt'><b>Wood feedstock</b><hr>Carlsoncorp Kings Park &rarr; Long Island Compost Farm #36<br>3,182 wet t/yr &middot; 30 mi</div>",
-          "w": 3.0606666666666666,
-          "wet_tons": 3182
+          "tooltip": "<div class='tt'><b>Wood feedstock</b><hr>Carlsoncorp Kings Park &rarr; Long Island Compost Farm #36<br>5,000 wet t/yr &middot; 30 mi</div>",
+          "w": 3.666666666666667,
+          "wet_tons": 5000
         }
       ],
       "getHeight": 0.6,
@@ -499,14 +562,14 @@
       "getTargetPosition": "@@=[k_lon, k_lat]",
       "getWidth": "@@=w",
       "greatCircle": false,
-      "id": "4e151b4b-3dc1-4962-b9f9-85e72241ae75",
+      "id": "81622b34-f48e-4c5b-a83b-3d48aa9307a1",
       "pickable": true
     },
     {
       "@@type": "ArcLayer",
       "data": [
         {
-          "biochar_tons": 1738,
+          "biochar_tons": 1588,
           "c_lat": 41.01378,
           "c_lon": -73.75722,
           "customer": "Gedney Composting and Recycling (White Plains)",
@@ -516,8 +579,8 @@
           "k_lon": -74.19319,
           "miles": 48,
           "site": "DSNY Fresh Kills Composting Facility",
-          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; Gedney Composting and Recycling (White Plains)<br>1,738 t/yr &middot; 48 mi</div>",
-          "w": 4.8966666666666665
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; Gedney Composting and Recycling (White Plains)<br>1,588 t/yr &middot; 48 mi</div>",
+          "w": 4.6466666666666665
         },
         {
           "biochar_tons": 1200,
@@ -576,7 +639,7 @@
           "w": 2.1666666666666665
         },
         {
-          "biochar_tons": 150,
+          "biochar_tons": 50,
           "c_lat": 40.59646,
           "c_lon": -74.18139,
           "customer": "NYC Parks Greenbelt Native Plant Center (Staten Island)",
@@ -586,11 +649,39 @@
           "k_lon": -74.19319,
           "miles": 1,
           "site": "DSNY Fresh Kills Composting Facility",
-          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; NYC Parks Greenbelt Native Plant Center (Staten Island)<br>150 t/yr &middot; 1 mi</div>",
-          "w": 2.25
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; NYC Parks Greenbelt Native Plant Center (Staten Island)<br>50 t/yr &middot; 1 mi</div>",
+          "w": 2.0833333333333335
         },
         {
-          "biochar_tons": 2444,
+          "biochar_tons": 200,
+          "c_lat": 40.86224,
+          "c_lon": -73.87715,
+          "customer": "New York Botanical Garden (Bronx)",
+          "j": 21,
+          "k": 0,
+          "k_lat": 40.58586,
+          "k_lon": -74.19319,
+          "miles": 34,
+          "site": "DSNY Fresh Kills Composting Facility",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; New York Botanical Garden (Bronx)<br>200 t/yr &middot; 34 mi</div>",
+          "w": 2.3333333333333335
+        },
+        {
+          "biochar_tons": 50,
+          "c_lat": 40.66766,
+          "c_lon": -73.96363,
+          "customer": "Brooklyn Botanic Garden (Brooklyn)",
+          "j": 22,
+          "k": 0,
+          "k_lat": 40.58586,
+          "k_lon": -74.19319,
+          "miles": 16,
+          "site": "DSNY Fresh Kills Composting Facility",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>DSNY Fresh Kills Composting Facility &rarr; Brooklyn Botanic Garden (Brooklyn)<br>50 t/yr &middot; 16 mi</div>",
+          "w": 2.0833333333333335
+        },
+        {
+          "biochar_tons": 2144,
           "c_lat": 40.80158,
           "c_lon": -72.92632,
           "customer": "Long Island Compost - Grucci Lane (Yaphank)",
@@ -600,8 +691,8 @@
           "k_lon": -73.64408,
           "miles": 42,
           "site": "Garden City Compost",
-          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Long Island Compost - Grucci Lane (Yaphank)<br>2,444 t/yr &middot; 42 mi</div>",
-          "w": 6.073333333333333
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Long Island Compost - Grucci Lane (Yaphank)<br>2,144 t/yr &middot; 42 mi</div>",
+          "w": 5.573333333333333
         },
         {
           "biochar_tons": 1200,
@@ -618,7 +709,7 @@
           "w": 4.0
         },
         {
-          "biochar_tons": 62,
+          "biochar_tons": 212,
           "c_lat": 41.01378,
           "c_lon": -73.75722,
           "customer": "Gedney Composting and Recycling (White Plains)",
@@ -628,8 +719,8 @@
           "k_lon": -73.64408,
           "miles": 31,
           "site": "Garden City Compost",
-          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Gedney Composting and Recycling (White Plains)<br>62 t/yr &middot; 31 mi</div>",
-          "w": 2.1033333333333335
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Gedney Composting and Recycling (White Plains)<br>212 t/yr &middot; 31 mi</div>",
+          "w": 2.3533333333333335
         },
         {
           "biochar_tons": 900,
@@ -646,7 +737,49 @@
           "w": 3.5
         },
         {
-          "biochar_tons": 1306,
+          "biochar_tons": 50,
+          "c_lat": 40.74818,
+          "c_lon": -73.72189,
+          "customer": "Queens County Farm Museum (Floral Park)",
+          "j": 20,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 6,
+          "site": "Garden City Compost",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Queens County Farm Museum (Floral Park)<br>50 t/yr &middot; 6 mi</div>",
+          "w": 2.0833333333333335
+        },
+        {
+          "biochar_tons": 50,
+          "c_lat": 40.75354,
+          "c_lon": -73.78218,
+          "customer": "Garden World (Bayside)",
+          "j": 23,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 10,
+          "site": "Garden City Compost",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Garden World (Bayside)<br>50 t/yr &middot; 10 mi</div>",
+          "w": 2.0833333333333335
+        },
+        {
+          "biochar_tons": 50,
+          "c_lat": 40.69955,
+          "c_lon": -73.65114,
+          "customer": "Giordano Garden Shoppe (West Hempstead)",
+          "j": 24,
+          "k": 1,
+          "k_lat": 40.72178,
+          "k_lon": -73.64408,
+          "miles": 2,
+          "site": "Garden City Compost",
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Garden City Compost &rarr; Giordano Garden Shoppe (West Hempstead)<br>50 t/yr &middot; 2 mi</div>",
+          "w": 2.0833333333333335
+        },
+        {
+          "biochar_tons": 1606,
           "c_lat": 40.80158,
           "c_lon": -72.92632,
           "customer": "Long Island Compost - Grucci Lane (Yaphank)",
@@ -656,8 +789,8 @@
           "k_lon": -72.83329,
           "miles": 10,
           "site": "Long Island Compost Farm #36",
-          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Long Island Compost Farm #36 &rarr; Long Island Compost - Grucci Lane (Yaphank)<br>1,306 t/yr &middot; 10 mi</div>",
-          "w": 4.176666666666667
+          "tooltip": "<div class='tt'><b>Biochar delivery</b><hr>Long Island Compost Farm #36 &rarr; Long Island Compost - Grucci Lane (Yaphank)<br>1,606 t/yr &middot; 10 mi</div>",
+          "w": 4.676666666666667
         },
         {
           "biochar_tons": 1800,
@@ -733,14 +866,14 @@
       "getTargetPosition": "@@=[c_lon, c_lat]",
       "getWidth": "@@=w",
       "greatCircle": false,
-      "id": "273e2a8c-a7af-4f1f-b270-6caecf5f4b5e",
+      "id": "1a48bded-28f5-44a6-a827-fb6779042963",
       "pickable": true
     },
     {
       "@@type": "ColumnLayer",
       "data": [
         {
-          "annual_profit": 3815772,
+          "annual_profit": 3815751,
           "biochar_revenue": 2268750,
           "biochar_tons_out": 4538,
           "capacity_tpy": 30000,
@@ -748,30 +881,61 @@
           "carbon_credit_revenue": 1124393,
           "carbon_credits": 6353,
           "dry_tons": 16500,
-          "elev": 147444.46092417807,
+          "elev": 147280.24369016537,
           "idx": 0,
           "label": "$23.1M",
           "lat": 40.58586,
           "lon": -74.19319,
           "machine_size": "Medium",
-          "npv": 23123069,
-          "npv_fmt": "$23,123,069",
+          "npv": 23122904,
+          "npv_fmt": "$23,122,904",
           "opex_rent": 600000,
           "pos": [
             -74.19319,
             40.58586,
-            149944.46092417807
+            149780.24369016537
           ],
           "site": "DSNY Fresh Kills Composting Facility",
           "site_id": "K1",
           "tipping_fee_income": 1050000,
-          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,500 dry t)<br>Biochar produced: <b>4,538 t/yr</b><br>Carbon credits generated: <b>6,353 /yr</b><br>Annual profit: <b>$3,815,772</b><br>Net present value: <b style='color:#ffd24d'>$23,123,069</b></div>",
-          "trucking_cost": 27370,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,500 dry t)<br>Biochar produced: <b>4,538 t/yr</b><br>Carbon credits generated: <b>6,353 /yr</b><br>Annual profit: <b>$3,815,751</b><br>Net present value: <b style='color:#ffd24d'>$23,122,904</b></div>",
+          "trucking_cost": 27392,
           "wet_tons_in": 30000,
           "wood_purchase_cost": 0
         },
         {
-          "annual_profit": 3868464,
+          "annual_profit": 3869440,
+          "biochar_revenue": 2303125,
+          "biochar_tons_out": 4606,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1141429,
+          "carbon_credits": 6449,
+          "dry_tons": 16750,
+          "elev": 149881.30524863285,
+          "idx": 1,
+          "label": "$23.5M",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "machine_size": "Medium",
+          "npv": 23531269,
+          "npv_fmt": "$23,531,269",
+          "opex_rent": 600000,
+          "pos": [
+            -73.64408,
+            40.72178,
+            152381.30524863285
+          ],
+          "site": "Garden City Compost",
+          "site_id": "K2",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,869,440</b><br>Net present value: <b style='color:#ffd24d'>$23,531,269</b></div>",
+          "trucking_cost": 25114,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3871890,
           "biochar_revenue": 2303125,
           "biochar_tons_out": 4606,
           "capacity_tpy": 30000,
@@ -780,56 +944,25 @@
           "carbon_credits": 6449,
           "dry_tons": 16750,
           "elev": 150000.0,
-          "idx": 1,
-          "label": "$23.5M",
-          "lat": 40.72178,
-          "lon": -73.64408,
-          "machine_size": "Medium",
-          "npv": 23523843,
-          "npv_fmt": "$23,523,843",
-          "opex_rent": 600000,
-          "pos": [
-            -73.64408,
-            40.72178,
-            152500.0
-          ],
-          "site": "Garden City Compost",
-          "site_id": "K2",
-          "tipping_fee_income": 1050000,
-          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,868,464</b><br>Net present value: <b style='color:#ffd24d'>$23,523,843</b></div>",
-          "trucking_cost": 26090,
-          "wet_tons_in": 30000,
-          "wood_purchase_cost": 0
-        },
-        {
-          "annual_profit": 3612185,
-          "biochar_revenue": 2153125,
-          "biochar_tons_out": 4306,
-          "capacity_tpy": 30000,
-          "capex": 5900000,
-          "carbon_credit_revenue": 1067089,
-          "carbon_credits": 6029,
-          "dry_tons": 15659,
-          "elev": 137570.40463159018,
           "idx": 4,
-          "label": "$21.6M",
+          "label": "$23.5M",
           "lat": 40.85226,
           "lon": -72.83329,
           "machine_size": "Medium",
-          "npv": 21574564,
-          "npv_fmt": "$21,574,564",
-          "opex_rent": 578182,
+          "npv": 23549904,
+          "npv_fmt": "$23,549,904",
+          "opex_rent": 600000,
           "pos": [
             -72.83329,
             40.85226,
-            140070.40463159018
+            152500.0
           ],
           "site": "Long Island Compost Farm #36",
           "site_id": "K5",
-          "tipping_fee_income": 986364,
-          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>28,182 wet t</b> (15,659 dry t)<br>Biochar produced: <b>4,306 t/yr</b><br>Carbon credits generated: <b>6,029 /yr</b><br>Annual profit: <b>$3,612,185</b><br>Net present value: <b style='color:#ffd24d'>$21,574,564</b></div>",
-          "trucking_cost": 16211,
-          "wet_tons_in": 28182,
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,871,890</b><br>Net present value: <b style='color:#ffd24d'>$23,549,904</b></div>",
+          "trucking_cost": 22664,
+          "wet_tons_in": 30000,
           "wood_purchase_cost": 0
         },
         {
@@ -841,7 +974,7 @@
           "carbon_credit_revenue": 446040,
           "carbon_credits": 2520,
           "dry_tons": 6545,
-          "elev": 24239.795768063916,
+          "elev": 24212.97131402319,
           "idx": 6,
           "label": "$3.8M",
           "lat": 42.58205,
@@ -853,7 +986,7 @@
           "pos": [
             -76.2139,
             42.58205,
-            26739.795768063916
+            26712.97131402319
           ],
           "site": "Gutchess Lumber Co. (Cortland)",
           "site_id": "K7",
@@ -872,7 +1005,7 @@
           "carbon_credit_revenue": 398648,
           "carbon_credits": 2252,
           "dry_tons": 5850,
-          "elev": 19002.24593405083,
+          "elev": 18981.21750305224,
           "idx": 9,
           "label": "$3.0M",
           "lat": 43.14956,
@@ -884,7 +1017,7 @@
           "pos": [
             -77.12458,
             43.14956,
-            21502.24593405083
+            21481.21750305224
           ],
           "site": "Peter C. Herman Inc. (Marion)",
           "site_id": "K10",
@@ -906,7 +1039,7 @@
         45
       ],
       "getPosition": "@@=[lon, lat]",
-      "id": "6ccabf97-3ec6-4659-8fa7-94019fe416fe",
+      "id": "8b6eb126-99d2-46d3-9a11-29219acaa431",
       "material": false,
       "pickable": false,
       "radius": 17000
@@ -916,7 +1049,7 @@
       "autoHighlight": true,
       "data": [
         {
-          "annual_profit": 3815772,
+          "annual_profit": 3815751,
           "biochar_revenue": 2268750,
           "biochar_tons_out": 4538,
           "capacity_tpy": 30000,
@@ -924,30 +1057,61 @@
           "carbon_credit_revenue": 1124393,
           "carbon_credits": 6353,
           "dry_tons": 16500,
-          "elev": 147444.46092417807,
+          "elev": 147280.24369016537,
           "idx": 0,
           "label": "$23.1M",
           "lat": 40.58586,
           "lon": -74.19319,
           "machine_size": "Medium",
-          "npv": 23123069,
-          "npv_fmt": "$23,123,069",
+          "npv": 23122904,
+          "npv_fmt": "$23,122,904",
           "opex_rent": 600000,
           "pos": [
             -74.19319,
             40.58586,
-            149944.46092417807
+            149780.24369016537
           ],
           "site": "DSNY Fresh Kills Composting Facility",
           "site_id": "K1",
           "tipping_fee_income": 1050000,
-          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,500 dry t)<br>Biochar produced: <b>4,538 t/yr</b><br>Carbon credits generated: <b>6,353 /yr</b><br>Annual profit: <b>$3,815,772</b><br>Net present value: <b style='color:#ffd24d'>$23,123,069</b></div>",
-          "trucking_cost": 27370,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,500 dry t)<br>Biochar produced: <b>4,538 t/yr</b><br>Carbon credits generated: <b>6,353 /yr</b><br>Annual profit: <b>$3,815,751</b><br>Net present value: <b style='color:#ffd24d'>$23,122,904</b></div>",
+          "trucking_cost": 27392,
           "wet_tons_in": 30000,
           "wood_purchase_cost": 0
         },
         {
-          "annual_profit": 3868464,
+          "annual_profit": 3869440,
+          "biochar_revenue": 2303125,
+          "biochar_tons_out": 4606,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1141429,
+          "carbon_credits": 6449,
+          "dry_tons": 16750,
+          "elev": 149881.30524863285,
+          "idx": 1,
+          "label": "$23.5M",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "machine_size": "Medium",
+          "npv": 23531269,
+          "npv_fmt": "$23,531,269",
+          "opex_rent": 600000,
+          "pos": [
+            -73.64408,
+            40.72178,
+            152381.30524863285
+          ],
+          "site": "Garden City Compost",
+          "site_id": "K2",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,869,440</b><br>Net present value: <b style='color:#ffd24d'>$23,531,269</b></div>",
+          "trucking_cost": 25114,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3871890,
           "biochar_revenue": 2303125,
           "biochar_tons_out": 4606,
           "capacity_tpy": 30000,
@@ -956,56 +1120,25 @@
           "carbon_credits": 6449,
           "dry_tons": 16750,
           "elev": 150000.0,
-          "idx": 1,
-          "label": "$23.5M",
-          "lat": 40.72178,
-          "lon": -73.64408,
-          "machine_size": "Medium",
-          "npv": 23523843,
-          "npv_fmt": "$23,523,843",
-          "opex_rent": 600000,
-          "pos": [
-            -73.64408,
-            40.72178,
-            152500.0
-          ],
-          "site": "Garden City Compost",
-          "site_id": "K2",
-          "tipping_fee_income": 1050000,
-          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,868,464</b><br>Net present value: <b style='color:#ffd24d'>$23,523,843</b></div>",
-          "trucking_cost": 26090,
-          "wet_tons_in": 30000,
-          "wood_purchase_cost": 0
-        },
-        {
-          "annual_profit": 3612185,
-          "biochar_revenue": 2153125,
-          "biochar_tons_out": 4306,
-          "capacity_tpy": 30000,
-          "capex": 5900000,
-          "carbon_credit_revenue": 1067089,
-          "carbon_credits": 6029,
-          "dry_tons": 15659,
-          "elev": 137570.40463159018,
           "idx": 4,
-          "label": "$21.6M",
+          "label": "$23.5M",
           "lat": 40.85226,
           "lon": -72.83329,
           "machine_size": "Medium",
-          "npv": 21574564,
-          "npv_fmt": "$21,574,564",
-          "opex_rent": 578182,
+          "npv": 23549904,
+          "npv_fmt": "$23,549,904",
+          "opex_rent": 600000,
           "pos": [
             -72.83329,
             40.85226,
-            140070.40463159018
+            152500.0
           ],
           "site": "Long Island Compost Farm #36",
           "site_id": "K5",
-          "tipping_fee_income": 986364,
-          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>28,182 wet t</b> (15,659 dry t)<br>Biochar produced: <b>4,306 t/yr</b><br>Carbon credits generated: <b>6,029 /yr</b><br>Annual profit: <b>$3,612,185</b><br>Net present value: <b style='color:#ffd24d'>$21,574,564</b></div>",
-          "trucking_cost": 16211,
-          "wet_tons_in": 28182,
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,871,890</b><br>Net present value: <b style='color:#ffd24d'>$23,549,904</b></div>",
+          "trucking_cost": 22664,
+          "wet_tons_in": 30000,
           "wood_purchase_cost": 0
         },
         {
@@ -1017,7 +1150,7 @@
           "carbon_credit_revenue": 446040,
           "carbon_credits": 2520,
           "dry_tons": 6545,
-          "elev": 24239.795768063916,
+          "elev": 24212.97131402319,
           "idx": 6,
           "label": "$3.8M",
           "lat": 42.58205,
@@ -1029,7 +1162,7 @@
           "pos": [
             -76.2139,
             42.58205,
-            26739.795768063916
+            26712.97131402319
           ],
           "site": "Gutchess Lumber Co. (Cortland)",
           "site_id": "K7",
@@ -1048,7 +1181,7 @@
           "carbon_credit_revenue": 398648,
           "carbon_credits": 2252,
           "dry_tons": 5850,
-          "elev": 19002.24593405083,
+          "elev": 18981.21750305224,
           "idx": 9,
           "label": "$3.0M",
           "lat": 43.14956,
@@ -1060,7 +1193,7 @@
           "pos": [
             -77.12458,
             43.14956,
-            21502.24593405083
+            21481.21750305224
           ],
           "site": "Peter C. Herman Inc. (Marion)",
           "site_id": "K10",
@@ -1088,7 +1221,7 @@
         255,
         255
       ],
-      "id": "7f3a3ce1-bb3f-46a4-a7ae-6ff443963b4d",
+      "id": "77c56d10-d513-40e3-a2e0-093dce2651bc",
       "material": false,
       "pickable": true,
       "radius": 8500
@@ -1098,7 +1231,7 @@
       "billboard": true,
       "data": [
         {
-          "annual_profit": 3815772,
+          "annual_profit": 3815751,
           "biochar_revenue": 2268750,
           "biochar_tons_out": 4538,
           "capacity_tpy": 30000,
@@ -1106,30 +1239,61 @@
           "carbon_credit_revenue": 1124393,
           "carbon_credits": 6353,
           "dry_tons": 16500,
-          "elev": 147444.46092417807,
+          "elev": 147280.24369016537,
           "idx": 0,
           "label": "$23.1M",
           "lat": 40.58586,
           "lon": -74.19319,
           "machine_size": "Medium",
-          "npv": 23123069,
-          "npv_fmt": "$23,123,069",
+          "npv": 23122904,
+          "npv_fmt": "$23,122,904",
           "opex_rent": 600000,
           "pos": [
             -74.19319,
             40.58586,
-            149944.46092417807
+            149780.24369016537
           ],
           "site": "DSNY Fresh Kills Composting Facility",
           "site_id": "K1",
           "tipping_fee_income": 1050000,
-          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,500 dry t)<br>Biochar produced: <b>4,538 t/yr</b><br>Carbon credits generated: <b>6,353 /yr</b><br>Annual profit: <b>$3,815,772</b><br>Net present value: <b style='color:#ffd24d'>$23,123,069</b></div>",
-          "trucking_cost": 27370,
+          "tooltip": "<div class='tt'><b>DSNY Fresh Kills Composting Facility</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,500 dry t)<br>Biochar produced: <b>4,538 t/yr</b><br>Carbon credits generated: <b>6,353 /yr</b><br>Annual profit: <b>$3,815,751</b><br>Net present value: <b style='color:#ffd24d'>$23,122,904</b></div>",
+          "trucking_cost": 27392,
           "wet_tons_in": 30000,
           "wood_purchase_cost": 0
         },
         {
-          "annual_profit": 3868464,
+          "annual_profit": 3869440,
+          "biochar_revenue": 2303125,
+          "biochar_tons_out": 4606,
+          "capacity_tpy": 30000,
+          "capex": 5900000,
+          "carbon_credit_revenue": 1141429,
+          "carbon_credits": 6449,
+          "dry_tons": 16750,
+          "elev": 149881.30524863285,
+          "idx": 1,
+          "label": "$23.5M",
+          "lat": 40.72178,
+          "lon": -73.64408,
+          "machine_size": "Medium",
+          "npv": 23531269,
+          "npv_fmt": "$23,531,269",
+          "opex_rent": 600000,
+          "pos": [
+            -73.64408,
+            40.72178,
+            152381.30524863285
+          ],
+          "site": "Garden City Compost",
+          "site_id": "K2",
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,869,440</b><br>Net present value: <b style='color:#ffd24d'>$23,531,269</b></div>",
+          "trucking_cost": 25114,
+          "wet_tons_in": 30000,
+          "wood_purchase_cost": 0
+        },
+        {
+          "annual_profit": 3871890,
           "biochar_revenue": 2303125,
           "biochar_tons_out": 4606,
           "capacity_tpy": 30000,
@@ -1138,56 +1302,25 @@
           "carbon_credits": 6449,
           "dry_tons": 16750,
           "elev": 150000.0,
-          "idx": 1,
-          "label": "$23.5M",
-          "lat": 40.72178,
-          "lon": -73.64408,
-          "machine_size": "Medium",
-          "npv": 23523843,
-          "npv_fmt": "$23,523,843",
-          "opex_rent": 600000,
-          "pos": [
-            -73.64408,
-            40.72178,
-            152500.0
-          ],
-          "site": "Garden City Compost",
-          "site_id": "K2",
-          "tipping_fee_income": 1050000,
-          "tooltip": "<div class='tt'><b>Garden City Compost</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,868,464</b><br>Net present value: <b style='color:#ffd24d'>$23,523,843</b></div>",
-          "trucking_cost": 26090,
-          "wet_tons_in": 30000,
-          "wood_purchase_cost": 0
-        },
-        {
-          "annual_profit": 3612185,
-          "biochar_revenue": 2153125,
-          "biochar_tons_out": 4306,
-          "capacity_tpy": 30000,
-          "capex": 5900000,
-          "carbon_credit_revenue": 1067089,
-          "carbon_credits": 6029,
-          "dry_tons": 15659,
-          "elev": 137570.40463159018,
           "idx": 4,
-          "label": "$21.6M",
+          "label": "$23.5M",
           "lat": 40.85226,
           "lon": -72.83329,
           "machine_size": "Medium",
-          "npv": 21574564,
-          "npv_fmt": "$21,574,564",
-          "opex_rent": 578182,
+          "npv": 23549904,
+          "npv_fmt": "$23,549,904",
+          "opex_rent": 600000,
           "pos": [
             -72.83329,
             40.85226,
-            140070.40463159018
+            152500.0
           ],
           "site": "Long Island Compost Farm #36",
           "site_id": "K5",
-          "tipping_fee_income": 986364,
-          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>28,182 wet t</b> (15,659 dry t)<br>Biochar produced: <b>4,306 t/yr</b><br>Carbon credits generated: <b>6,029 /yr</b><br>Annual profit: <b>$3,612,185</b><br>Net present value: <b style='color:#ffd24d'>$21,574,564</b></div>",
-          "trucking_cost": 16211,
-          "wet_tons_in": 28182,
+          "tipping_fee_income": 1050000,
+          "tooltip": "<div class='tt'><b>Long Island Compost Farm #36</b><hr>Machine size: <b>Medium</b> (30,000 t/yr)<br>Tons processed / yr: <b>30,000 wet t</b> (16,750 dry t)<br>Biochar produced: <b>4,606 t/yr</b><br>Carbon credits generated: <b>6,449 /yr</b><br>Annual profit: <b>$3,871,890</b><br>Net present value: <b style='color:#ffd24d'>$23,549,904</b></div>",
+          "trucking_cost": 22664,
+          "wet_tons_in": 30000,
           "wood_purchase_cost": 0
         },
         {
@@ -1199,7 +1332,7 @@
           "carbon_credit_revenue": 446040,
           "carbon_credits": 2520,
           "dry_tons": 6545,
-          "elev": 24239.795768063916,
+          "elev": 24212.97131402319,
           "idx": 6,
           "label": "$3.8M",
           "lat": 42.58205,
@@ -1211,7 +1344,7 @@
           "pos": [
             -76.2139,
             42.58205,
-            26739.795768063916
+            26712.97131402319
           ],
           "site": "Gutchess Lumber Co. (Cortland)",
           "site_id": "K7",
@@ -1230,7 +1363,7 @@
           "carbon_credit_revenue": 398648,
           "carbon_credits": 2252,
           "dry_tons": 5850,
-          "elev": 19002.24593405083,
+          "elev": 18981.21750305224,
           "idx": 9,
           "label": "$3.0M",
           "lat": 43.14956,
@@ -1242,7 +1375,7 @@
           "pos": [
             -77.12458,
             43.14956,
-            21502.24593405083
+            21481.21750305224
           ],
           "site": "Peter C. Herman Inc. (Marion)",
           "site_id": "K10",
@@ -1265,7 +1398,7 @@
       "getPosition": "@@=pos",
       "getSize": 18,
       "getText": "@@=label",
-      "id": "1935e35c-73b8-4be8-902f-722acebab8e0"
+      "id": "61630be8-fc24-4d30-82c0-c2b80bed9892"
     }
   ],
   "mapProvider": "carto",

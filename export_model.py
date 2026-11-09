@@ -24,12 +24,13 @@ def compact(R):
 def main():
     sup, sites, cus = O.sup, O.sites, O.cus
     down = sup.region == "Downstate"
+    site_region = sup.set_index("id").region[sites.colocated_supplier].values     # region of the supplier each site sits at
     defaults = dict(
         biochar_price=C.BIOCHAR_PRICE, credit_price=C.CREDIT_PRICE, tco2_per_credit=C.TCO2_PER_CREDIT,
         co2_per_t=C.CO2_PER_T_BIOCHAR, yield_pct=C.YIELD * 100,
-        tip=float(-sup[down].price_per_ton.mean()), residue_price=float(sup[~down].price_per_ton.mean()),
+        tip=float(-sup[down].price_per_ton.mean()), residue_price=float(sup[sup.region == "Upstate"].price_per_ton.mean()),
         capex_per_t=C.CAPEX_PER_TPY / REF, capex_fixed_m=C.CAPEX_FIXED / 1e6, opex=C.VAR_OPEX_PER_WET_T,
-        rent_fixed_k=C.RENT_FIXED / 1e3, rent_per_t=C.RENT_PER_TPY, rent_factor=float(sites.rent_factor[down.values].mean()),
+        rent_fixed_k=C.RENT_FIXED / 1e3, rent_per_t=C.RENT_PER_TPY, rent_factor=float(sites.rent_factor[site_region == "Downstate"].mean()),
         truck=C.TRUCK_COST_PER_MILE, max_wood_mi=C.MAX_WOOD_MILES, max_char_mi=C.MAX_CHAR_MILES, wood_payload=C.WOOD_PAYLOAD_T, char_payload=C.BIOCHAR_PAYLOAD_T,
         discount=C.DISCOUNT_RATE * 100, life=C.LIFETIME_YEARS, budget_m=C.BUDGET / 1e6, min_util=C.MIN_UTILIZATION * 100,
         demand_total=float(cus.demand_tpy.sum()), supply_scale=1.0,
@@ -40,7 +41,7 @@ def main():
         sizes=[dict(name=k, cap=v) for k, v in C.MACHINE_SIZES.items()],
         suppliers=[dict(name=r["name"], region=r.region, lat=r.lat, lon=r.lon, supply=int(r.supply_tpy), moisture=float(r.moisture))
                    for _, r in sup.iterrows()],
-        sites=[dict(name=r["name"], lat=r.lat, lon=r.lon, region=sup.region[i]) for i, r in sites.iterrows()],
+        sites=[dict(name=r["name"], lat=r.lat, lon=r.lon, region=site_region[i]) for i, r in sites.iterrows()],
         customers=[dict(name=r["name"], type=r.type, lat=r.lat, lon=r.lon, demand=float(r.demand_tpy)) for _, r in cus.iterrows()],
         dSS=[[round(float(v), 2) for v in row] for row in O.D_SS], dSC=[[round(float(v), 2) for v in row] for row in O.D_SC],
         lifetime=C.LIFETIME_YEARS,
