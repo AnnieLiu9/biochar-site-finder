@@ -17,15 +17,19 @@ S = [
  ("Gutchess Freedom", "Upstate", 42.46678, -78.38494, 18000, 0.50, 10, "DEC Wood Directory 2017"),
  ("Ward Lumber Co. (Jay)", "Upstate", 44.36617, -73.72421, 13500, 0.50, 10, "DEC Wood Directory 2017"),
  ("Peter C. Herman Inc. (Marion)", "Upstate", 43.14956, -77.12458, 11700, 0.50, 10, "DEC Wood Directory 2017"),
- # Wood source only (not a candidate plant site: a plant inside the park is unlikely to be allowed). Location: OpenStreetMap
- # Nominatim; volume and price are ASSUMPTIONS (tree work and chips from a 358-acre park; free wood, the buyer pays only trucking).
- ("NYC Parks - Cunningham Park (Queens)", "Public park", 40.7352, -73.7675, 3000, 0.45, 0, "OSM Nominatim; volume assumed"),
+ # Wood source only, see NO_PLANT below. Queens Parks staff estimate 20,000-30,000 cubic yards (about 5,000-7,000 t) of surplus chips a year,
+ # now hauled to Waste Management "at considerable expense" (Cambium Carbon, NYC Parks wood assessment, 2022); 6,000 t is the midpoint.
+ # Price follows the other downstate sources (the plant is paid a tipping fee) - an ASSUMPTION. Location: OSM Nominatim.
+ ("NYC Parks - Cunningham Park (Queens)", "Downstate", 40.7352, -73.7675, 6000, 0.45, -35, "Cambium Carbon 2022; OSM Nominatim"),
 ]
+# Wood sources that are not candidate plant sites: Public Trust Doctrine likely rules out a closed commercial operation on park land
+# (same report), and Cunningham Park already hosts the unofficial grinding site.
+NO_PLANT = {"NYC Parks - Cunningham Park (Queens)"}
 sup = pd.DataFrame(S, columns=["name","region","lat","lon","supply_tpy","moisture","price_per_ton","source"])
 sup.insert(0, "id", [f"S{i+1}" for i in range(len(sup))])
 sup[["id","name","region","lat","lon","supply_tpy","moisture","price_per_ton","source"]].to_csv("data/suppliers.csv", index=False)
 
-cand = sup[sup.region != "Public park"]                      # every other wood source doubles as a candidate plant site
+cand = sup[~sup.name.isin(NO_PLANT)]                         # every other wood source doubles as a candidate plant site
 sites = cand[["id","name","lat","lon"]].copy().reset_index(drop=True)
 sites["id"] = [f"K{i+1}" for i in range(len(sites))]
 sites["colocated_supplier"] = cand["id"].values
@@ -55,13 +59,14 @@ K = [
  ("Clear Flo Technologies (Lindenhurst)", "Compost/Soil", 40.71658, -73.39818, 600),
  ("Queens Botanical Garden Farm & Compost Site (Flushing)", "Urban Agriculture", 40.75157, -73.82612, 100),
  ("Brooklyn Grange (Brooklyn Navy Yard)", "Urban Agriculture", 40.69854, -73.97228, 50),
- ("NYC Parks Greenbelt Native Plant Center (Staten Island)", "Municipal Nursery", 40.59646, -74.18139, 100),
- # Added near Cunningham Park (Queens). Locations: OpenStreetMap Nominatim; demand is an ASSUMPTION (farm / garden 100-300 t, retail 50 t).
- ("Queens County Farm Museum (Floral Park)", "Urban Agriculture", 40.74818, -73.72189, 100),
- ("New York Botanical Garden (Bronx)", "Botanical Garden", 40.86224, -73.87715, 200),
- ("Brooklyn Botanic Garden (Brooklyn)", "Botanical Garden", 40.66766, -73.96363, 100),
- ("Garden World (Bayside)", "Retail Garden Hub", 40.75354, -73.78218, 50),
- ("Giordano Garden Shoppe (West Hempstead)", "Retail Garden Hub", 40.69955, -73.65114, 50),
+ ("NYC Parks Greenbelt Native Plant Center (Staten Island)", "Municipal Nursery", 40.59646, -74.18139, 25),
+ # Added near Cunningham Park (Queens). Locations: OpenStreetMap Nominatim. Demand is an ASSUMPTION of about 0.5 t biochar per acre of managed
+ # land per year: Queens Farm 47 acres, Botanical Garden (Bronx) 250, Brooklyn Botanic Garden 52, Greenbelt nursery 13; garden shops 25 t.
+ ("Queens County Farm Museum (Floral Park)", "Urban Agriculture", 40.74818, -73.72189, 25),
+ ("New York Botanical Garden (Bronx)", "Botanical Garden", 40.86224, -73.87715, 125),
+ ("Brooklyn Botanic Garden (Brooklyn)", "Botanical Garden", 40.66766, -73.96363, 25),
+ ("Garden World (Bayside)", "Retail Garden Hub", 40.75354, -73.78218, 25),
+ ("Giordano Garden Shoppe (West Hempstead)", "Retail Garden Hub", 40.69955, -73.65114, 25),
 ]
 cus = pd.DataFrame(K, columns=["name","type","lat","lon","demand_tpy"])
 cus.insert(0, "id", [f"C{i+1}" for i in range(len(cus))])

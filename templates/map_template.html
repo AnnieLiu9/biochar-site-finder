@@ -239,10 +239,10 @@ const GROUPS = [
 const ALL = GROUPS.flatMap(g => g.items);
 const PRESETS = [
   ['Default', {}],
-  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 21500}],
+  ['Conservative', {credit_price: 100, biochar_price: 300, demand_total: 21250}],
   ['Market-aligned', {credit_price: 140, tco2_per_credit: 1}],
   ['No carbon credits', {credit_price: 0}],
-  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 43000}],
+  ['Bull case', {tco2_per_credit: 1, biochar_price: 700, demand_total: 42250}],
 ];
 let P = {...DEF};
 let act = D.base;
@@ -404,7 +404,7 @@ function buildLP(Q) {
   const capexWet = Q.capex_per_t * D.ref;
   const capexS = SZ.map(s => Q.capex_fixed_m * 1e6 + capexWet * s.cap);
   const rent = (k, s) => (Q.rent_fixed_k * 1e3 + Q.rent_per_t * SZ[s].cap) * (SITES[k].region === 'Downstate' ? Q.rent_factor : 1);
-  const price = SUP.map(s => s.region === 'Downstate' ? -Q.tip : s.region === 'Upstate' ? Q.residue_price : s.price);   // other sources (public land) keep their own fixed price
+  const price = SUP.map(s => s.region === 'Downstate' ? -Q.tip : Q.residue_price);
   const conv = SUP.map(s => (1 - s.moisture) * Q.yield_pct / 100);
   const supply = SUP.map(s => s.supply * Q.supply_scale);
   const demand = CUS.map(c => c.demand * Q.demand_total / DEF.demand_total);

@@ -39,7 +39,7 @@ def main():
     data = dict(
         defaults=defaults, ref=REF, base=base,
         sizes=[dict(name=k, cap=v) for k, v in C.MACHINE_SIZES.items()],
-        suppliers=[dict(name=r["name"], region=r.region, lat=r.lat, lon=r.lon, supply=int(r.supply_tpy), moisture=float(r.moisture), price=float(r.price_per_ton))
+        suppliers=[dict(name=r["name"], region=r.region, lat=r.lat, lon=r.lon, supply=int(r.supply_tpy), moisture=float(r.moisture))
                    for _, r in sup.iterrows()],
         sites=[dict(name=r["name"], lat=r.lat, lon=r.lon, region=site_region[i]) for i, r in sites.iterrows()],
         customers=[dict(name=r["name"], type=r.type, lat=r.lat, lon=r.lon, demand=float(r.demand_tpy)) for _, r in cus.iterrows()],
